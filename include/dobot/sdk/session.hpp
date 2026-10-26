@@ -12,7 +12,7 @@
 
 #include <dobot_fastdds.hpp>
 
-#include "dobot/action/action.hpp"
+#include "dobot/motion/motion.hpp"
 #include "dobot/sdk/channel.hpp"
 #include "dobot/sdk/motion_rpc.hpp"
 #include "dobot/sdk/robot_profile.hpp"
@@ -45,7 +45,8 @@ struct SessionConfig {
 //
 // 应用代码从这里进：
 //   session.Init(机型描述, 配置)
-//   session.rpc().GetFsmId()
+//   session.motion().SetRobotMode(...)
+//   session.rpc().GetFsmId()   // 薄 RPC，调试或未封装方法
 //   auto state = session.Subscribe<消息的 PubSubType>(话题名)
 //   state.Latest()
 //   session.Publish<消息的 PubSubType>(话题名).Write(cmd)
@@ -70,8 +71,8 @@ public:
     MotionRpc& rpc() { return motion_; }
     const MotionRpc& rpc() const { return motion_; }
 
-    // 动作业务。封装现有 ExecuteAction，不把 JSON 交给调用方。
-    dobot::action::Action action() const { return dobot::action::Action(motion_); }
+    // 语义化运控：模式、预设动作、舞蹈。内部走 MotionRpc。
+    dobot::motion::Motion motion() const { return dobot::motion::Motion(motion_); }
 
     // 给某一台独有的新 RPC 用。两台都有的方法加到 MotionRpc，不要从这里绕过。
     RpcResult Call(const std::string& method, const nlohmann::json& params, int timeout_ms = 3000) const;

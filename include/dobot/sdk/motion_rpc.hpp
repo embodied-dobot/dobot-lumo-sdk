@@ -24,6 +24,8 @@ public:
     // 切换运控状态机。result 为 1 表示成功，0 表示切换失败。
     // 进入 Mini 站立模式使用 300，之后才能发 rt/stand/cmd。
     RpcResult SetFsmId(int32_t fsm_id, int timeout_ms = 3000) const;
+    // 查询当前全部状态机。成功时 result 是对象数组。不是数组时返回 kJson。
+    RpcResult GetFsmList(int timeout_ms = 3000) const;
     // vx 向前为正，m/s；vy 向左为正，m/s；vyaw 逆时针为正，rad/s。
     // duration 是保持时间，单位秒，超时后停止。停机用 SetVel(0, 0, 0)。
     RpcResult SetVel(float vx, float vy, float vyaw, float duration = 1.0f, int timeout_ms = 3000) const;
@@ -34,8 +36,6 @@ public:
     // 播放技能目录里的动作。file_path 是文件名，不是调用方本机路径。
     // timeout_ms 只覆盖这次 RPC 往返，不表示动作已经播完。
     RpcResult ExecuteAction(const std::string& file_path, int timeout_ms = 3000) const;
-    // 登记一个舞蹈模型。成功时 result 为新的状态机编号，范围 350 到 400。之后用 SetFsmId 播放。
-    RpcResult AddDancePolicy(const std::string& name, int motion_loop_length, int motion_hold_back_steps, int motion_start_step = 0, int timeout_ms = 3000) const;
 
 private:
     friend class Session;
