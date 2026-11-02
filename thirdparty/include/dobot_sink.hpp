@@ -271,12 +271,7 @@ public:
     Base::async_mode_ = output_config_.async_mode;
   }
 
-  virtual ~MultiRotateStrategy() {
-    // 清理资源
-    if (Base::logger_) {
-      spdlog::drop(Base::logger_->name());
-    }
-  }
+  virtual ~MultiRotateStrategy() = default;
 
   std::shared_ptr<spdlog::logger> CreateLogger() override {
     std::vector<spdlog::sink_ptr> sinks;

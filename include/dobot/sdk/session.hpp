@@ -32,12 +32,15 @@ enum class RunWhere {
 // robot_ip 只给 RPC。留空时，电脑用机型默认 IP，机器人本机用 127.0.0.1。
 // domain_id 默认 0。network_interface 留空时，所有网卡都参与 DDS 发现。
 // 话题 QoS 用编译进库的配置，按「话题名.reader」和「话题名.writer」取。
+// async_subscribe 默认 false：订阅回调在 Fast DDS 监听线程里、take 之后立刻执行。
+// 设为 true 时，回调改到有序队列的 worker 上。
 struct SessionConfig {
     RunWhere where = RunWhere::kComputer;
     std::string robot_ip;
     int rpc_port = 0;
     uint32_t domain_id = 0;
     std::string network_interface;
+    bool async_subscribe = false;
 };
 
 // 连上一台机器人。一个 Session 拥有这条连接上的 RPC 和 DDS。

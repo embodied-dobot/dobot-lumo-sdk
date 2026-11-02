@@ -100,9 +100,7 @@ namespace dobot::dds
 
     inline std::string resolveXmlQosProfile(const std::string &topic_name, const std::string &qos_profile, const char *suffix)
     {
-        if (qos_profile.empty() || qos_profile == kDefaultXmlWriterQosProfile || qos_profile == kDefaultXmlReaderQosProfile) {
-            return topic_name + suffix;
-        }
+        if (qos_profile.empty() || qos_profile == kDefaultXmlWriterQosProfile || qos_profile == kDefaultXmlReaderQosProfile) { return topic_name + suffix; }
         return qos_profile;
     }
 

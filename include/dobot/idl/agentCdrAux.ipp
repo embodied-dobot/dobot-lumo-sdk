@@ -64,6 +64,12 @@ eProsima_user_DllExport size_t calculate_serialized_size(
         calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(3),
                 data.mode(), current_alignment);
 
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(4),
+                data.state(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(5),
+                data.is_photo(), current_alignment);
+
 
     calculated_size += calculator.end_calculate_type_serialized_size(previous_encoding, current_alignment);
 
@@ -88,6 +94,8 @@ eProsima_user_DllExport void serialize(
         << eprosima::fastcdr::MemberId(1) << data.seq()
         << eprosima::fastcdr::MemberId(2) << data.emergency_stop()
         << eprosima::fastcdr::MemberId(3) << data.mode()
+        << eprosima::fastcdr::MemberId(4) << data.state()
+        << eprosima::fastcdr::MemberId(5) << data.is_photo()
 ;
     scdr.end_serialize_type(current_state);
 }
@@ -123,6 +131,14 @@ eProsima_user_DllExport void deserialize(
                                                 dcdr >> data.mode();
                                             break;
 
+                                        case 4:
+                                                dcdr >> data.state();
+                                            break;
+
+                                        case 5:
+                                                dcdr >> data.is_photo();
+                                            break;
+
                     default:
                         ret_value = false;
                         break;
@@ -146,6 +162,10 @@ void serialize_key(
                         scdr << data.emergency_stop();
 
                         scdr << data.mode();
+
+                        scdr << data.state();
+
+                        scdr << data.is_photo();
 
 }
 

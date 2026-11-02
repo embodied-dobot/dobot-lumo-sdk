@@ -76,6 +76,16 @@ enum class AgentEvent : int32_t
     CHG_APP
 };
 /*!
+ * @brief This class represents the enumeration AgentRunningState defined by the user in the IDL file.
+ * @ingroup agent
+ */
+enum class AgentRunningState : int32_t
+{
+    ST_IDLE,
+    ST_RUNNING,
+    ST_REASONING
+};
+/*!
  * @brief This class represents the structure AgentState_ defined by the user in the IDL file.
  * @ingroup agent
  */
@@ -112,6 +122,10 @@ public:
 
                     m_mode = x.m_mode;
 
+                    m_state = x.m_state;
+
+                    m_is_photo = x.m_is_photo;
+
     }
 
     /*!
@@ -125,6 +139,8 @@ public:
         m_seq = x.m_seq;
         m_emergency_stop = x.m_emergency_stop;
         m_mode = x.m_mode;
+        m_state = x.m_state;
+        m_is_photo = x.m_is_photo;
     }
 
     /*!
@@ -143,6 +159,10 @@ public:
 
                     m_mode = x.m_mode;
 
+                    m_state = x.m_state;
+
+                    m_is_photo = x.m_is_photo;
+
         return *this;
     }
 
@@ -158,6 +178,8 @@ public:
         m_seq = x.m_seq;
         m_emergency_stop = x.m_emergency_stop;
         m_mode = x.m_mode;
+        m_state = x.m_state;
+        m_is_photo = x.m_is_photo;
         return *this;
     }
 
@@ -171,7 +193,9 @@ public:
         return (m_timestamp == x.m_timestamp &&
            m_seq == x.m_seq &&
            m_emergency_stop == x.m_emergency_stop &&
-           m_mode == x.m_mode);
+           m_mode == x.m_mode &&
+           m_state == x.m_state &&
+           m_is_photo == x.m_is_photo);
     }
 
     /*!
@@ -300,6 +324,64 @@ public:
     }
 
 
+    /*!
+     * @brief This function sets a value in member state
+     * @param _state New value for member state
+     */
+    eProsima_user_DllExport void state(
+            AgentRunningState _state)
+    {
+        m_state = _state;
+    }
+
+    /*!
+     * @brief This function returns the value of member state
+     * @return Value of member state
+     */
+    eProsima_user_DllExport AgentRunningState state() const
+    {
+        return m_state;
+    }
+
+    /*!
+     * @brief This function returns a reference to member state
+     * @return Reference to member state
+     */
+    eProsima_user_DllExport AgentRunningState& state()
+    {
+        return m_state;
+    }
+
+
+    /*!
+     * @brief This function sets a value in member is_photo
+     * @param _is_photo New value for member is_photo
+     */
+    eProsima_user_DllExport void is_photo(
+            bool _is_photo)
+    {
+        m_is_photo = _is_photo;
+    }
+
+    /*!
+     * @brief This function returns the value of member is_photo
+     * @return Value of member is_photo
+     */
+    eProsima_user_DllExport bool is_photo() const
+    {
+        return m_is_photo;
+    }
+
+    /*!
+     * @brief This function returns a reference to member is_photo
+     * @return Reference to member is_photo
+     */
+    eProsima_user_DllExport bool& is_photo()
+    {
+        return m_is_photo;
+    }
+
+
 
 private:
 
@@ -307,6 +389,8 @@ private:
     uint32_t m_seq{0};
     bool m_emergency_stop{false};
     AgentMode m_mode{AgentMode::CTRL_UNKNOWN};
+    AgentRunningState m_state{AgentRunningState::ST_IDLE};
+    bool m_is_photo{false};
 
 };
 /*!

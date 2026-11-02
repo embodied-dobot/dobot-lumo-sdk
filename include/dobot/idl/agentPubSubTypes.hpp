@@ -60,12 +60,12 @@ namespace dobot
 
             struct AgentState__f
             {
-                typedef dobot::msg::dds_::AgentMode AgentState_::* type;
+                typedef bool AgentState_::* type;
                 friend constexpr type get(
                         AgentState__f);
             };
 
-            template struct AgentState__rob<AgentState__f, &AgentState_::m_mode>;
+            template struct AgentState__rob<AgentState__f, &AgentState_::m_is_photo>;
 
             template <typename T, typename Tag>
             inline size_t constexpr AgentState__offset_of()
@@ -165,16 +165,16 @@ namespace dobot
 
                 static constexpr bool is_plain_xcdrv1_impl()
                 {
-                    return 20ULL ==
+                    return 25ULL ==
                            (detail::AgentState__offset_of<AgentState_, detail::AgentState__f>() +
-                           sizeof(dobot::msg::dds_::AgentMode));
+                           sizeof(bool));
                 }
 
                 static constexpr bool is_plain_xcdrv2_impl()
                 {
-                    return 20ULL ==
+                    return 25ULL ==
                            (detail::AgentState__offset_of<AgentState_, detail::AgentState__f>() +
-                           sizeof(dobot::msg::dds_::AgentMode));
+                           sizeof(bool));
                 }
 
             };

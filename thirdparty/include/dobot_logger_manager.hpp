@@ -1,5 +1,6 @@
 #pragma once
 #include "dobot_sink.hpp"
+#include <atomic>
 #include <memory>
 
 namespace dobot
@@ -44,8 +45,9 @@ namespace dobot
             LoggerManager &operator=(const LoggerManager &&) = delete;
             // 根据策略创建具体的策略实现
             std::unique_ptr<LogStrategyInterface> CreateStrategy();
-
-            std::atomic<bool> cleanup_registered_;
+            std::atomic<bool> cleanup_registered_{false};
+            // 显式 Shutdown 和 atexit 都会进来，只允许第一次真正释放 spdlog。
+            std::atomic<bool> shutdown_{false};
             std::unique_ptr<LogStrategyInterface> strategy_;
             std::shared_ptr<spdlog::logger> logger_;
         };

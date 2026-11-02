@@ -24,8 +24,9 @@
 
 #include "agent.hpp"
 
-constexpr uint32_t dobot_msg_dds__AgentState__max_cdr_typesize {20UL};
+constexpr uint32_t dobot_msg_dds__AgentState__max_cdr_typesize {25UL};
 constexpr uint32_t dobot_msg_dds__AgentState__max_key_cdr_typesize {0UL};
+
 
 
 constexpr uint32_t dobot_msg_dds__AgentEventWrapper__max_cdr_typesize {12UL};
