@@ -1,4 +1,6 @@
-// SR_3588 的通用 RPC 示例。已经封装的方法用 Session::rpc()，这里演示直接按方法名调用。
+// SR_3588 的原始 JSON-RPC 示例。
+// 查状态机、切模式、预设动作、舞蹈用 motion_demo；速度用 walk_demo。
+// 这里留给 session.rpc() 还没有单独示例的方法，以及还没有成员函数的方法。
 #include "dobot/robot/sr_3588/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -13,10 +15,11 @@ void Usage(const char* argv0) {
     std::cerr
         << "用法: " << argv0
         << " [--ip " << dobot::robot::sr_3588::kDefaultRobotIp << "] [--port " << dobot::robot::sr_3588::kAlgsRpcPort
-        << "] [--method GetFsmId] [--params '{}'] [--timeout-ms 3000] [--on-robot] [--domain 0] [--nic 网卡名]\n"
+        << "] --method 方法名 [--params '{}'] [--timeout-ms 3000] [--on-robot] [--domain 0] [--nic 网卡名]\n"
         << "不填 --ip 时，电脑上用机型默认地址，--on-robot 时用 127.0.0.1。\n"
-        << "示例: " << argv0 << " --method GetFsmId\n"
-        << "      " << argv0 << " --method SetFsmId --params '{\"fsm_id\":1}'\n";
+        << "查状态机、切模式、预设动作和舞蹈用 motion_demo，速度用 walk_demo。\n"
+        << "示例: " << argv0 << " --method ReloadArmSkillsData\n"
+        << "      " << argv0 << " --method ExecuteAction --params '{\"file_path\":\"skill.csv\"}'\n";
 }
 
 }  // namespace
@@ -28,7 +31,8 @@ int main(int argc, char** argv) {
     std::string network_interface;
     std::string ip;
     int port = dobot::robot::sr_3588::kAlgsRpcPort;
-    std::string method = "GetFsmId";
+    bool method_set = false;
+    std::string method;
     std::string params_text = "{}";
     int timeout_ms = 3000;
 
@@ -57,6 +61,7 @@ int main(int argc, char** argv) {
             port = std::stoi(need("--port"));
         } else if (arg == "--method") {
             method = need("--method");
+            method_set = true;
         } else if (arg == "--params") {
             params_text = need("--params");
         } else if (arg == "--timeout-ms") {
@@ -66,6 +71,11 @@ int main(int argc, char** argv) {
             Usage(argv[0]);
             return 2;
         }
+    }
+    if (!method_set || method.empty()) {
+        std::cerr << "缺少 --method。查状态机和切模式请用 motion_demo，速度请用 walk_demo。\n";
+        Usage(argv[0]);
+        return 2;
     }
 
     nlohmann::json params;

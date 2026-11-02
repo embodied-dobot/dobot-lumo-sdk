@@ -15,7 +15,7 @@
 
 下面用 SR_3588 走通一次查询。SR_thro 把程序名里的 `sr_3588` 换成 `sr_thro`，IP 换成 `172.16.20.2`。
 
-## 10 分钟跑通 GetFsmId
+## 10 分钟查通状态机
 
 ### 1. 确认网络
 
@@ -38,14 +38,14 @@ ping -c 3 192.168.5.2
 机器人上：
 
 ```bash
-./example/bin/aarch64/sr_3588_rpc_call --on-robot --method GetFsmId
+./example/bin/aarch64/sr_3588_motion_demo --on-robot
 ./example/bin/aarch64/sr_3588_dds_echo --on-robot
 ```
 
 电脑上：
 
 ```bash
-./example/bin/x86_64/sr_3588_rpc_call --ip 192.168.5.2 --method GetFsmId
+./example/bin/x86_64/sr_3588_motion_demo --ip 192.168.5.2
 ```
 
 `--on-robot` 让 RPC 连本机 `127.0.0.1`。电脑上不带这个参数，并按实际地址加 `--ip`。SR_thro 把程序名里的 `sr_3588` 换成 `sr_thro`。
@@ -59,29 +59,29 @@ cmake -S . -B build
 cmake --build build -j
 ```
 
-重编的程序在 `build/bin/`。交叉编译时指定目标架构的编译器，例如 `-DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++`，CMake 会改用 `lib/aarch64` 和 `thirdparty/lib/aarch64`。系统的 glibc 或 libstdc++ 低于上面的版本时，配置会提示链不上 `thirdparty/lib/<架构>` 里的 `libfastdds.so`，并跳过 DDS 示例。`sr_3588_rpc_call` 仍然会编出来。
+重编的程序在 `build/bin/`。交叉编译时指定目标架构的编译器，例如 `-DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++`，CMake 会改用 `lib/aarch64` 和 `thirdparty/lib/aarch64`。系统的 glibc 或 libstdc++ 低于上面的版本时，配置会提示链不上 `thirdparty/lib/<架构>` 里的 `libfastdds.so`，并跳过 DDS 示例。`sr_3588_motion_demo`、`sr_3588_walk_demo` 和 `sr_3588_rpc_call` 仍然会编出来。
 
 ### 3. 查询状态机编号
 
 ```bash
-./example/bin/aarch64/sr_3588_rpc_call --on-robot --method GetFsmId
+./example/bin/aarch64/sr_3588_motion_demo --on-robot
 ```
 
 机器人不在默认地址、程序跑在电脑上时：
 
 ```bash
-./example/bin/x86_64/sr_3588_rpc_call --ip 192.168.5.2 --method GetFsmId
+./example/bin/x86_64/sr_3588_motion_demo --ip 192.168.5.2
 ```
 
-成功时打印机器人返回的 JSON。`GetFsmId` 的 `result` 是当前状态机编号，`0` 也是合法编号。
+成功时打印当前状态机编号和短名称，例如 `当前状态机 300 (站立)`。`0` 也是合法编号。切到 Mini 站立加 `--mode stand`，预设动作加 `--action`，舞蹈加 `--dance`。前后走用 `sr_3588_walk_demo --run`。
 
-连不上时会看到 `RPC 失败`，后面是错误名和系统错误。先核对 IP、端口 `51234`，以及本机到该地址的路由。默认超时 3000 毫秒，可以加 `--timeout-ms`。
+连不上时会看到 `GetFsmId 失败`，后面是错误名。先核对 IP、端口 `51234`，以及本机到该地址的路由。默认超时 3000 毫秒，可以加 `--timeout-ms`。
 
-要用原始 JSON 调其他方法时，用 `sr_3588_rpc_call`：
+技能重载、动作文件，以及还没有成员函数的方法，用 `sr_3588_rpc_call`。`--method` 必填：
 
 ```bash
-./example/bin/aarch64/sr_3588_rpc_call --on-robot --method GetFsmId
-./example/bin/aarch64/sr_3588_rpc_call --on-robot --method SetFsmId --params '{"fsm_id":1}'
+./example/bin/aarch64/sr_3588_rpc_call --on-robot --method ReloadArmSkillsData
+./example/bin/aarch64/sr_3588_rpc_call --on-robot --method ExecuteAction --params '{"file_path":"skill.csv"}'
 ```
 
 ## 目录
@@ -127,4 +127,4 @@ target_link_libraries(my_app PRIVATE dobot_sdk)
 
 这样会把示例也编进去。不需要示例时加上 `-DBUILD_EXAMPLES=OFF`。
 
-当前系统能链上 Fast DDS 时，`dobot_sdk` 会带上 `fastdds` 和 `fastcdr`。链不上时，只调用 `RpcClient` 的程序仍然可以编译。
+当前系统能链上 Fast DDS 时，`dobot_sdk` 会带上 `fastdds` 和 `fastcdr`。链不上时，`motion_demo`、`walk_demo` 和 `rpc_call` 仍然可以编译。
