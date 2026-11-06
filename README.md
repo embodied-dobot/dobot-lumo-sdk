@@ -11,9 +11,9 @@
 | 型号 | 命名空间 | 默认 IP |
 |---|---|---|
 | SR_3588 | `dobot::robot::sr_3588` | `192.168.5.2` |
-| SR_thro | `dobot::robot::sr_thro` | `172.16.20.2` |
+| SR_thor | `dobot::robot::sr_thor` | `172.16.20.2` |
 
-下面用 SR_3588 走通一次查询。SR_thro 把程序名里的 `sr_3588` 换成 `sr_thro`，IP 换成 `172.16.20.2`。
+下面用 SR_3588 走通一次查询。SR_thor 把程序名里的 `sr_3588` 换成 `sr_thor`，IP 换成 `172.16.20.2`。
 
 ## 10 分钟查通状态机
 
@@ -48,7 +48,7 @@ ping -c 3 192.168.5.2
 ./example/bin/x86_64/sr_3588_motion_demo --ip 192.168.5.2
 ```
 
-`--on-robot` 让 RPC 连本机 `127.0.0.1`。电脑上不带这个参数，并按实际地址加 `--ip`。SR_thro 把程序名里的 `sr_3588` 换成 `sr_thro`。
+`--on-robot` 让 RPC 连本机 `127.0.0.1`。电脑上不带这个参数，并按实际地址加 `--ip`。SR_thor 把程序名里的 `sr_3588` 换成 `sr_thor`。
 
 某一架构的 `example/bin/` 里还没有文件时，说明那一套还没放进来。先用已经放好的架构。
 
@@ -90,13 +90,13 @@ cmake --build build -j
 |---|---|
 | `include/dobot/sdk/` | DDS 会话、JSON-RPC 传输 |
 | `include/dobot/robot/sr_3588/` | SR_3588 的话题名、RPC 方法和默认 IP |
-| `include/dobot/robot/sr_thro/` | SR_thro 的话题名、RPC 方法和默认 IP |
+| `include/dobot/robot/sr_thor/` | SR_thor 的话题名、RPC 方法和默认 IP |
 | `include/dobot/idl/` | DDS 消息头文件 |
 | `include/nlohmann/` | JSON 头文件 |
 | `lib/aarch64/`、`lib/x86_64/` | `libdobot_sdk.a`、`libdobot_log.so` |
 | `thirdparty/lib/aarch64/`、`thirdparty/lib/x86_64/` | `libfastdds.so`、`libfastcdr.so` |
 | `example/bin/aarch64/`、`example/bin/x86_64/` | 对应架构已经编好的示例 |
-| `example/src/sr_3588/`、`example/src/sr_thro/` | 各型号的示例源码，要改示例时再编 |
+| `example/src/sr_3588/`、`example/src/sr_thor/` | 各型号的示例源码，要改示例时再编 |
 | `thirdparty/include/` | Fast DDS、Fast CDR、日志的头文件 |
 
 自己重编的示例落在 `build/bin/`，从 `lib/<架构>` 找 `libdobot_log.so`，从 `thirdparty/lib/<架构>` 找 Fast DDS。DDS 的 domain 和网卡用 `SessionConfig` 的 `domain_id`、`network_interface`，或示例的 `--domain`、`--nic`。

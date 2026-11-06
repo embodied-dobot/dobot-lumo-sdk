@@ -11,4 +11,4 @@ function(dobot_add_example target source)
 endfunction()
 
 add_subdirectory(src/sr_3588)
-add_subdirectory(src/sr_thro)
+add_subdirectory(src/sr_thor)

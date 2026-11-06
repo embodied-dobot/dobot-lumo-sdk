@@ -48,10 +48,12 @@ constexpr const char* kTopicLocomotionAlarm = "rt/locomotion/alarm/state";  // L
 constexpr const char* kTopicWifiStatus = "rt/wifi/status";                  // WifiStatus_
 constexpr const char* kTopicPerfFault = "dobot_perf_fault";                 // FaultInfo_
 
-// 语音。
+// 语音。调用方订阅 command、vad、output，发布 tts、ack、control。
 constexpr const char* kTopicVoiceCommand = "rt/voice/command";              // VoiceCommand_
+constexpr const char* kTopicVoiceVadEvent = "rt/voice/vad_event";           // VADEvent_
 constexpr const char* kTopicVoiceTtsRequest = "rt/voice/tts_request";       // TTSRequest_
 constexpr const char* kTopicVoiceAckRequest = "rt/voice/ack_request";       // AckRequest_
+constexpr const char* kTopicVoiceControl = "rt/voice/control";              // VoiceControl_
 constexpr const char* kTopicVoiceOutputEvent = "rt/voice/output_event";     // VoiceOutputEvent_
 
 // 头部。
