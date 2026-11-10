@@ -47,7 +47,7 @@ eProsima_user_DllExport size_t calculate_serialized_size(
     eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
     size_t calculated_size {calculator.begin_calculate_type_serialized_size(
                                 eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
-                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
                                 eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
                                 current_alignment)};
 
@@ -74,7 +74,7 @@ eProsima_user_DllExport void serialize(
     eprosima::fastcdr::Cdr::state current_state(scdr);
     scdr.begin_serialize_type(current_state,
             eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
 
     scdr
@@ -92,7 +92,7 @@ eProsima_user_DllExport void deserialize(
     using namespace dobot::msg::dds_;
 
     cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
             [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
             {
@@ -133,6 +133,296 @@ void serialize_key(
 template<>
 eProsima_user_DllExport size_t calculate_serialized_size(
         eprosima::fastcdr::CdrSizeCalculator& calculator,
+        const dobot::msg::dds_::SystemLanguageSet_& data,
+        size_t& current_alignment)
+{
+    using namespace dobot::msg::dds_;
+
+    static_cast<void>(data);
+
+    eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
+    size_t calculated_size {calculator.begin_calculate_type_serialized_size(
+                                eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
+                                current_alignment)};
+
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(0),
+                data.header(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(1),
+                data.request_id(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(2),
+                data.language(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(3),
+                data.revision(), current_alignment);
+
+
+    calculated_size += calculator.end_calculate_type_serialized_size(previous_encoding, current_alignment);
+
+    return calculated_size;
+}
+
+template<>
+eProsima_user_DllExport void serialize(
+        eprosima::fastcdr::Cdr& scdr,
+        const dobot::msg::dds_::SystemLanguageSet_& data)
+{
+    using namespace dobot::msg::dds_;
+
+    eprosima::fastcdr::Cdr::state current_state(scdr);
+    scdr.begin_serialize_type(current_state,
+            eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
+
+    scdr
+        << eprosima::fastcdr::MemberId(0) << data.header()
+        << eprosima::fastcdr::MemberId(1) << data.request_id()
+        << eprosima::fastcdr::MemberId(2) << data.language()
+        << eprosima::fastcdr::MemberId(3) << data.revision()
+;
+    scdr.end_serialize_type(current_state);
+}
+
+template<>
+eProsima_user_DllExport void deserialize(
+        eprosima::fastcdr::Cdr& cdr,
+        dobot::msg::dds_::SystemLanguageSet_& data)
+{
+    using namespace dobot::msg::dds_;
+
+    cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
+            [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
+            {
+                bool ret_value = true;
+                switch (mid.id)
+                {
+                                        case 0:
+                                                dcdr >> data.header();
+                                            break;
+
+                                        case 1:
+                                                dcdr >> data.request_id();
+                                            break;
+
+                                        case 2:
+                                                dcdr >> data.language();
+                                            break;
+
+                                        case 3:
+                                                dcdr >> data.revision();
+                                            break;
+
+                    default:
+                        ret_value = false;
+                        break;
+                }
+                return ret_value;
+            });
+}
+
+void serialize_key(
+        eprosima::fastcdr::Cdr& scdr,
+        const dobot::msg::dds_::SystemLanguageSet_& data)
+{
+    using namespace dobot::msg::dds_;
+            extern void serialize_key(
+                    Cdr& scdr,
+                    const dobot::msg::dds_::VoiceHeader_& data);
+
+
+
+
+
+    static_cast<void>(scdr);
+    static_cast<void>(data);
+                        serialize_key(scdr, data.header());
+
+                        scdr << data.request_id();
+
+                        scdr << data.language();
+
+                        scdr << data.revision();
+
+}
+
+
+template<>
+eProsima_user_DllExport size_t calculate_serialized_size(
+        eprosima::fastcdr::CdrSizeCalculator& calculator,
+        const dobot::msg::dds_::SystemLanguageState_& data,
+        size_t& current_alignment)
+{
+    using namespace dobot::msg::dds_;
+
+    static_cast<void>(data);
+
+    eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
+    size_t calculated_size {calculator.begin_calculate_type_serialized_size(
+                                eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
+                                current_alignment)};
+
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(0),
+                data.header(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(1),
+                data.request_id(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(2),
+                data.request_source(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(3),
+                data.requested_language(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(4),
+                data.current_language(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(5),
+                data.current_revision(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(6),
+                data.result(), current_alignment);
+
+        calculated_size += calculator.calculate_member_serialized_size(eprosima::fastcdr::MemberId(7),
+                data.detail(), current_alignment);
+
+
+    calculated_size += calculator.end_calculate_type_serialized_size(previous_encoding, current_alignment);
+
+    return calculated_size;
+}
+
+template<>
+eProsima_user_DllExport void serialize(
+        eprosima::fastcdr::Cdr& scdr,
+        const dobot::msg::dds_::SystemLanguageState_& data)
+{
+    using namespace dobot::msg::dds_;
+
+    eprosima::fastcdr::Cdr::state current_state(scdr);
+    scdr.begin_serialize_type(current_state,
+            eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
+
+    scdr
+        << eprosima::fastcdr::MemberId(0) << data.header()
+        << eprosima::fastcdr::MemberId(1) << data.request_id()
+        << eprosima::fastcdr::MemberId(2) << data.request_source()
+        << eprosima::fastcdr::MemberId(3) << data.requested_language()
+        << eprosima::fastcdr::MemberId(4) << data.current_language()
+        << eprosima::fastcdr::MemberId(5) << data.current_revision()
+        << eprosima::fastcdr::MemberId(6) << data.result()
+        << eprosima::fastcdr::MemberId(7) << data.detail()
+;
+    scdr.end_serialize_type(current_state);
+}
+
+template<>
+eProsima_user_DllExport void deserialize(
+        eprosima::fastcdr::Cdr& cdr,
+        dobot::msg::dds_::SystemLanguageState_& data)
+{
+    using namespace dobot::msg::dds_;
+
+    cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
+            [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
+            {
+                bool ret_value = true;
+                switch (mid.id)
+                {
+                                        case 0:
+                                                dcdr >> data.header();
+                                            break;
+
+                                        case 1:
+                                                dcdr >> data.request_id();
+                                            break;
+
+                                        case 2:
+                                                dcdr >> data.request_source();
+                                            break;
+
+                                        case 3:
+                                                dcdr >> data.requested_language();
+                                            break;
+
+                                        case 4:
+                                                dcdr >> data.current_language();
+                                            break;
+
+                                        case 5:
+                                                dcdr >> data.current_revision();
+                                            break;
+
+                                        case 6:
+                                                dcdr >> data.result();
+                                            break;
+
+                                        case 7:
+                                                dcdr >> data.detail();
+                                            break;
+
+                    default:
+                        ret_value = false;
+                        break;
+                }
+                return ret_value;
+            });
+}
+
+void serialize_key(
+        eprosima::fastcdr::Cdr& scdr,
+        const dobot::msg::dds_::SystemLanguageState_& data)
+{
+    using namespace dobot::msg::dds_;
+            extern void serialize_key(
+                    Cdr& scdr,
+                    const dobot::msg::dds_::VoiceHeader_& data);
+
+
+
+
+
+
+
+
+
+    static_cast<void>(scdr);
+    static_cast<void>(data);
+                        serialize_key(scdr, data.header());
+
+                        scdr << data.request_id();
+
+                        scdr << data.request_source();
+
+                        scdr << data.requested_language();
+
+                        scdr << data.current_language();
+
+                        scdr << data.current_revision();
+
+                        scdr << data.result();
+
+                        scdr << data.detail();
+
+}
+
+
+template<>
+eProsima_user_DllExport size_t calculate_serialized_size(
+        eprosima::fastcdr::CdrSizeCalculator& calculator,
         const dobot::msg::dds_::VoiceCommand_& data,
         size_t& current_alignment)
 {
@@ -143,7 +433,7 @@ eProsima_user_DllExport size_t calculate_serialized_size(
     eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
     size_t calculated_size {calculator.begin_calculate_type_serialized_size(
                                 eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
-                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
                                 eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
                                 current_alignment)};
 
@@ -185,7 +475,7 @@ eProsima_user_DllExport void serialize(
     eprosima::fastcdr::Cdr::state current_state(scdr);
     scdr.begin_serialize_type(current_state,
             eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
 
     scdr
@@ -208,7 +498,7 @@ eProsima_user_DllExport void deserialize(
     using namespace dobot::msg::dds_;
 
     cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
             [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
             {
@@ -299,7 +589,7 @@ eProsima_user_DllExport size_t calculate_serialized_size(
     eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
     size_t calculated_size {calculator.begin_calculate_type_serialized_size(
                                 eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
-                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
                                 eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
                                 current_alignment)};
 
@@ -350,7 +640,7 @@ eProsima_user_DllExport void serialize(
     eprosima::fastcdr::Cdr::state current_state(scdr);
     scdr.begin_serialize_type(current_state,
             eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
 
     scdr
@@ -376,7 +666,7 @@ eProsima_user_DllExport void deserialize(
     using namespace dobot::msg::dds_;
 
     cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
             [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
             {
@@ -488,7 +778,7 @@ eProsima_user_DllExport size_t calculate_serialized_size(
     eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
     size_t calculated_size {calculator.begin_calculate_type_serialized_size(
                                 eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
-                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
                                 eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
                                 current_alignment)};
 
@@ -527,7 +817,7 @@ eProsima_user_DllExport void serialize(
     eprosima::fastcdr::Cdr::state current_state(scdr);
     scdr.begin_serialize_type(current_state,
             eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
 
     scdr
@@ -549,7 +839,7 @@ eProsima_user_DllExport void deserialize(
     using namespace dobot::msg::dds_;
 
     cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
             [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
             {
@@ -633,7 +923,7 @@ eProsima_user_DllExport size_t calculate_serialized_size(
     eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
     size_t calculated_size {calculator.begin_calculate_type_serialized_size(
                                 eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
-                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
                                 eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
                                 current_alignment)};
 
@@ -672,7 +962,7 @@ eProsima_user_DllExport void serialize(
     eprosima::fastcdr::Cdr::state current_state(scdr);
     scdr.begin_serialize_type(current_state,
             eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
 
     scdr
@@ -694,7 +984,7 @@ eProsima_user_DllExport void deserialize(
     using namespace dobot::msg::dds_;
 
     cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
             [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
             {
@@ -778,7 +1068,7 @@ eProsima_user_DllExport size_t calculate_serialized_size(
     eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
     size_t calculated_size {calculator.begin_calculate_type_serialized_size(
                                 eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
-                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
                                 eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
                                 current_alignment)};
 
@@ -808,7 +1098,7 @@ eProsima_user_DllExport void serialize(
     eprosima::fastcdr::Cdr::state current_state(scdr);
     scdr.begin_serialize_type(current_state,
             eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
 
     scdr
@@ -827,7 +1117,7 @@ eProsima_user_DllExport void deserialize(
     using namespace dobot::msg::dds_;
 
     cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
             [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
             {
@@ -890,7 +1180,7 @@ eProsima_user_DllExport size_t calculate_serialized_size(
     eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
     size_t calculated_size {calculator.begin_calculate_type_serialized_size(
                                 eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
-                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
                                 eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
                                 current_alignment)};
 
@@ -923,7 +1213,7 @@ eProsima_user_DllExport void serialize(
     eprosima::fastcdr::Cdr::state current_state(scdr);
     scdr.begin_serialize_type(current_state,
             eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
 
     scdr
@@ -943,7 +1233,7 @@ eProsima_user_DllExport void deserialize(
     using namespace dobot::msg::dds_;
 
     cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
             [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
             {
@@ -1013,7 +1303,7 @@ eProsima_user_DllExport size_t calculate_serialized_size(
     eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
     size_t calculated_size {calculator.begin_calculate_type_serialized_size(
                                 eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
-                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
                                 eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
                                 current_alignment)};
 
@@ -1043,7 +1333,7 @@ eProsima_user_DllExport void serialize(
     eprosima::fastcdr::Cdr::state current_state(scdr);
     scdr.begin_serialize_type(current_state,
             eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
 
     scdr
@@ -1062,7 +1352,7 @@ eProsima_user_DllExport void deserialize(
     using namespace dobot::msg::dds_;
 
     cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
             [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
             {
@@ -1125,7 +1415,7 @@ eProsima_user_DllExport size_t calculate_serialized_size(
     eprosima::fastcdr::EncodingAlgorithmFlag previous_encoding = calculator.get_encoding();
     size_t calculated_size {calculator.begin_calculate_type_serialized_size(
                                 eprosima::fastcdr::CdrVersion::XCDRv2 == calculator.get_cdr_version() ?
-                                eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+                                eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
                                 eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
                                 current_alignment)};
 
@@ -1182,7 +1472,7 @@ eProsima_user_DllExport void serialize(
     eprosima::fastcdr::Cdr::state current_state(scdr);
     scdr.begin_serialize_type(current_state,
             eprosima::fastcdr::CdrVersion::XCDRv2 == scdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
 
     scdr
@@ -1210,7 +1500,7 @@ eProsima_user_DllExport void deserialize(
     using namespace dobot::msg::dds_;
 
     cdr.deserialize_type(eprosima::fastcdr::CdrVersion::XCDRv2 == cdr.get_cdr_version() ?
-            eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR2 :
+            eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2 :
             eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR,
             [&data](eprosima::fastcdr::Cdr& dcdr, const eprosima::fastcdr::MemberId& mid) -> bool
             {

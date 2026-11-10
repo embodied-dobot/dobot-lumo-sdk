@@ -83,7 +83,8 @@ enum class AgentRunningState : int32_t
 {
     ST_IDLE,
     ST_RUNNING,
-    ST_REASONING
+    ST_REASONING,
+    ST_PENDING_CONFIRMATION
 };
 /*!
  * @brief This class represents the structure AgentState_ defined by the user in the IDL file.

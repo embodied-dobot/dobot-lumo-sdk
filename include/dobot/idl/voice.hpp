@@ -322,6 +322,727 @@ private:
 
 };
 /*!
+ * @brief This class represents the enumeration SystemLanguageResult defined by the user in the IDL file.
+ * @ingroup voice
+ */
+enum class SystemLanguageResult : int32_t
+{
+    LANGUAGE_APPLIED,
+    LANGUAGE_UNCHANGED,
+    LANGUAGE_STALE_REQUEST,
+    LANGUAGE_INVALID_REQUEST,
+    LANGUAGE_INVALID_LANGUAGE,
+    LANGUAGE_ACK_DISABLED,
+    LANGUAGE_PERSIST_FAILED,
+    LANGUAGE_QUEUE_FULL
+};
+/*!
+ * @brief This class represents the structure SystemLanguageSet_ defined by the user in the IDL file.
+ * @ingroup voice
+ */
+class SystemLanguageSet_
+{
+public:
+
+    /*!
+     * @brief Default constructor.
+     */
+    eProsima_user_DllExport SystemLanguageSet_()
+    {
+    }
+
+    /*!
+     * @brief Default destructor.
+     */
+    eProsima_user_DllExport ~SystemLanguageSet_()
+    {
+    }
+
+    /*!
+     * @brief Copy constructor.
+     * @param x Reference to the object SystemLanguageSet_ that will be copied.
+     */
+    eProsima_user_DllExport SystemLanguageSet_(
+            const SystemLanguageSet_& x)
+    {
+                    m_header = x.m_header;
+
+                    m_request_id = x.m_request_id;
+
+                    m_language = x.m_language;
+
+                    m_revision = x.m_revision;
+
+    }
+
+    /*!
+     * @brief Move constructor.
+     * @param x Reference to the object SystemLanguageSet_ that will be copied.
+     */
+    eProsima_user_DllExport SystemLanguageSet_(
+            SystemLanguageSet_&& x) noexcept
+    {
+        m_header = std::move(x.m_header);
+        m_request_id = std::move(x.m_request_id);
+        m_language = std::move(x.m_language);
+        m_revision = x.m_revision;
+    }
+
+    /*!
+     * @brief Copy assignment.
+     * @param x Reference to the object SystemLanguageSet_ that will be copied.
+     */
+    eProsima_user_DllExport SystemLanguageSet_& operator =(
+            const SystemLanguageSet_& x)
+    {
+
+                    m_header = x.m_header;
+
+                    m_request_id = x.m_request_id;
+
+                    m_language = x.m_language;
+
+                    m_revision = x.m_revision;
+
+        return *this;
+    }
+
+    /*!
+     * @brief Move assignment.
+     * @param x Reference to the object SystemLanguageSet_ that will be copied.
+     */
+    eProsima_user_DllExport SystemLanguageSet_& operator =(
+            SystemLanguageSet_&& x) noexcept
+    {
+
+        m_header = std::move(x.m_header);
+        m_request_id = std::move(x.m_request_id);
+        m_language = std::move(x.m_language);
+        m_revision = x.m_revision;
+        return *this;
+    }
+
+    /*!
+     * @brief Comparison operator.
+     * @param x SystemLanguageSet_ object to compare.
+     */
+    eProsima_user_DllExport bool operator ==(
+            const SystemLanguageSet_& x) const
+    {
+        return (m_header == x.m_header &&
+           m_request_id == x.m_request_id &&
+           m_language == x.m_language &&
+           m_revision == x.m_revision);
+    }
+
+    /*!
+     * @brief Comparison operator.
+     * @param x SystemLanguageSet_ object to compare.
+     */
+    eProsima_user_DllExport bool operator !=(
+            const SystemLanguageSet_& x) const
+    {
+        return !(*this == x);
+    }
+
+    /*!
+     * @brief This function copies the value in member header
+     * @param _header New value to be copied in member header
+     */
+    eProsima_user_DllExport void header(
+            const VoiceHeader_& _header)
+    {
+        m_header = _header;
+    }
+
+    /*!
+     * @brief This function moves the value in member header
+     * @param _header New value to be moved in member header
+     */
+    eProsima_user_DllExport void header(
+            VoiceHeader_&& _header)
+    {
+        m_header = std::move(_header);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member header
+     * @return Constant reference to member header
+     */
+    eProsima_user_DllExport const VoiceHeader_& header() const
+    {
+        return m_header;
+    }
+
+    /*!
+     * @brief This function returns a reference to member header
+     * @return Reference to member header
+     */
+    eProsima_user_DllExport VoiceHeader_& header()
+    {
+        return m_header;
+    }
+
+
+    /*!
+     * @brief This function copies the value in member request_id
+     * @param _request_id New value to be copied in member request_id
+     */
+    eProsima_user_DllExport void request_id(
+            const std::string& _request_id)
+    {
+        m_request_id = _request_id;
+    }
+
+    /*!
+     * @brief This function moves the value in member request_id
+     * @param _request_id New value to be moved in member request_id
+     */
+    eProsima_user_DllExport void request_id(
+            std::string&& _request_id)
+    {
+        m_request_id = std::move(_request_id);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member request_id
+     * @return Constant reference to member request_id
+     */
+    eProsima_user_DllExport const std::string& request_id() const
+    {
+        return m_request_id;
+    }
+
+    /*!
+     * @brief This function returns a reference to member request_id
+     * @return Reference to member request_id
+     */
+    eProsima_user_DllExport std::string& request_id()
+    {
+        return m_request_id;
+    }
+
+
+    /*!
+     * @brief This function copies the value in member language
+     * @param _language New value to be copied in member language
+     */
+    eProsima_user_DllExport void language(
+            const std::string& _language)
+    {
+        m_language = _language;
+    }
+
+    /*!
+     * @brief This function moves the value in member language
+     * @param _language New value to be moved in member language
+     */
+    eProsima_user_DllExport void language(
+            std::string&& _language)
+    {
+        m_language = std::move(_language);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member language
+     * @return Constant reference to member language
+     */
+    eProsima_user_DllExport const std::string& language() const
+    {
+        return m_language;
+    }
+
+    /*!
+     * @brief This function returns a reference to member language
+     * @return Reference to member language
+     */
+    eProsima_user_DllExport std::string& language()
+    {
+        return m_language;
+    }
+
+
+    /*!
+     * @brief This function sets a value in member revision
+     * @param _revision New value for member revision
+     */
+    eProsima_user_DllExport void revision(
+            uint64_t _revision)
+    {
+        m_revision = _revision;
+    }
+
+    /*!
+     * @brief This function returns the value of member revision
+     * @return Value of member revision
+     */
+    eProsima_user_DllExport uint64_t revision() const
+    {
+        return m_revision;
+    }
+
+    /*!
+     * @brief This function returns a reference to member revision
+     * @return Reference to member revision
+     */
+    eProsima_user_DllExport uint64_t& revision()
+    {
+        return m_revision;
+    }
+
+
+
+private:
+
+    VoiceHeader_ m_header;
+    std::string m_request_id;
+    std::string m_language;
+    uint64_t m_revision{0};
+
+};
+/*!
+ * @brief This class represents the structure SystemLanguageState_ defined by the user in the IDL file.
+ * @ingroup voice
+ */
+class SystemLanguageState_
+{
+public:
+
+    /*!
+     * @brief Default constructor.
+     */
+    eProsima_user_DllExport SystemLanguageState_()
+    {
+    }
+
+    /*!
+     * @brief Default destructor.
+     */
+    eProsima_user_DllExport ~SystemLanguageState_()
+    {
+    }
+
+    /*!
+     * @brief Copy constructor.
+     * @param x Reference to the object SystemLanguageState_ that will be copied.
+     */
+    eProsima_user_DllExport SystemLanguageState_(
+            const SystemLanguageState_& x)
+    {
+                    m_header = x.m_header;
+
+                    m_request_id = x.m_request_id;
+
+                    m_request_source = x.m_request_source;
+
+                    m_requested_language = x.m_requested_language;
+
+                    m_current_language = x.m_current_language;
+
+                    m_current_revision = x.m_current_revision;
+
+                    m_result = x.m_result;
+
+                    m_detail = x.m_detail;
+
+    }
+
+    /*!
+     * @brief Move constructor.
+     * @param x Reference to the object SystemLanguageState_ that will be copied.
+     */
+    eProsima_user_DllExport SystemLanguageState_(
+            SystemLanguageState_&& x) noexcept
+    {
+        m_header = std::move(x.m_header);
+        m_request_id = std::move(x.m_request_id);
+        m_request_source = std::move(x.m_request_source);
+        m_requested_language = std::move(x.m_requested_language);
+        m_current_language = std::move(x.m_current_language);
+        m_current_revision = x.m_current_revision;
+        m_result = x.m_result;
+        m_detail = std::move(x.m_detail);
+    }
+
+    /*!
+     * @brief Copy assignment.
+     * @param x Reference to the object SystemLanguageState_ that will be copied.
+     */
+    eProsima_user_DllExport SystemLanguageState_& operator =(
+            const SystemLanguageState_& x)
+    {
+
+                    m_header = x.m_header;
+
+                    m_request_id = x.m_request_id;
+
+                    m_request_source = x.m_request_source;
+
+                    m_requested_language = x.m_requested_language;
+
+                    m_current_language = x.m_current_language;
+
+                    m_current_revision = x.m_current_revision;
+
+                    m_result = x.m_result;
+
+                    m_detail = x.m_detail;
+
+        return *this;
+    }
+
+    /*!
+     * @brief Move assignment.
+     * @param x Reference to the object SystemLanguageState_ that will be copied.
+     */
+    eProsima_user_DllExport SystemLanguageState_& operator =(
+            SystemLanguageState_&& x) noexcept
+    {
+
+        m_header = std::move(x.m_header);
+        m_request_id = std::move(x.m_request_id);
+        m_request_source = std::move(x.m_request_source);
+        m_requested_language = std::move(x.m_requested_language);
+        m_current_language = std::move(x.m_current_language);
+        m_current_revision = x.m_current_revision;
+        m_result = x.m_result;
+        m_detail = std::move(x.m_detail);
+        return *this;
+    }
+
+    /*!
+     * @brief Comparison operator.
+     * @param x SystemLanguageState_ object to compare.
+     */
+    eProsima_user_DllExport bool operator ==(
+            const SystemLanguageState_& x) const
+    {
+        return (m_header == x.m_header &&
+           m_request_id == x.m_request_id &&
+           m_request_source == x.m_request_source &&
+           m_requested_language == x.m_requested_language &&
+           m_current_language == x.m_current_language &&
+           m_current_revision == x.m_current_revision &&
+           m_result == x.m_result &&
+           m_detail == x.m_detail);
+    }
+
+    /*!
+     * @brief Comparison operator.
+     * @param x SystemLanguageState_ object to compare.
+     */
+    eProsima_user_DllExport bool operator !=(
+            const SystemLanguageState_& x) const
+    {
+        return !(*this == x);
+    }
+
+    /*!
+     * @brief This function copies the value in member header
+     * @param _header New value to be copied in member header
+     */
+    eProsima_user_DllExport void header(
+            const VoiceHeader_& _header)
+    {
+        m_header = _header;
+    }
+
+    /*!
+     * @brief This function moves the value in member header
+     * @param _header New value to be moved in member header
+     */
+    eProsima_user_DllExport void header(
+            VoiceHeader_&& _header)
+    {
+        m_header = std::move(_header);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member header
+     * @return Constant reference to member header
+     */
+    eProsima_user_DllExport const VoiceHeader_& header() const
+    {
+        return m_header;
+    }
+
+    /*!
+     * @brief This function returns a reference to member header
+     * @return Reference to member header
+     */
+    eProsima_user_DllExport VoiceHeader_& header()
+    {
+        return m_header;
+    }
+
+
+    /*!
+     * @brief This function copies the value in member request_id
+     * @param _request_id New value to be copied in member request_id
+     */
+    eProsima_user_DllExport void request_id(
+            const std::string& _request_id)
+    {
+        m_request_id = _request_id;
+    }
+
+    /*!
+     * @brief This function moves the value in member request_id
+     * @param _request_id New value to be moved in member request_id
+     */
+    eProsima_user_DllExport void request_id(
+            std::string&& _request_id)
+    {
+        m_request_id = std::move(_request_id);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member request_id
+     * @return Constant reference to member request_id
+     */
+    eProsima_user_DllExport const std::string& request_id() const
+    {
+        return m_request_id;
+    }
+
+    /*!
+     * @brief This function returns a reference to member request_id
+     * @return Reference to member request_id
+     */
+    eProsima_user_DllExport std::string& request_id()
+    {
+        return m_request_id;
+    }
+
+
+    /*!
+     * @brief This function copies the value in member request_source
+     * @param _request_source New value to be copied in member request_source
+     */
+    eProsima_user_DllExport void request_source(
+            const std::string& _request_source)
+    {
+        m_request_source = _request_source;
+    }
+
+    /*!
+     * @brief This function moves the value in member request_source
+     * @param _request_source New value to be moved in member request_source
+     */
+    eProsima_user_DllExport void request_source(
+            std::string&& _request_source)
+    {
+        m_request_source = std::move(_request_source);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member request_source
+     * @return Constant reference to member request_source
+     */
+    eProsima_user_DllExport const std::string& request_source() const
+    {
+        return m_request_source;
+    }
+
+    /*!
+     * @brief This function returns a reference to member request_source
+     * @return Reference to member request_source
+     */
+    eProsima_user_DllExport std::string& request_source()
+    {
+        return m_request_source;
+    }
+
+
+    /*!
+     * @brief This function copies the value in member requested_language
+     * @param _requested_language New value to be copied in member requested_language
+     */
+    eProsima_user_DllExport void requested_language(
+            const std::string& _requested_language)
+    {
+        m_requested_language = _requested_language;
+    }
+
+    /*!
+     * @brief This function moves the value in member requested_language
+     * @param _requested_language New value to be moved in member requested_language
+     */
+    eProsima_user_DllExport void requested_language(
+            std::string&& _requested_language)
+    {
+        m_requested_language = std::move(_requested_language);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member requested_language
+     * @return Constant reference to member requested_language
+     */
+    eProsima_user_DllExport const std::string& requested_language() const
+    {
+        return m_requested_language;
+    }
+
+    /*!
+     * @brief This function returns a reference to member requested_language
+     * @return Reference to member requested_language
+     */
+    eProsima_user_DllExport std::string& requested_language()
+    {
+        return m_requested_language;
+    }
+
+
+    /*!
+     * @brief This function copies the value in member current_language
+     * @param _current_language New value to be copied in member current_language
+     */
+    eProsima_user_DllExport void current_language(
+            const std::string& _current_language)
+    {
+        m_current_language = _current_language;
+    }
+
+    /*!
+     * @brief This function moves the value in member current_language
+     * @param _current_language New value to be moved in member current_language
+     */
+    eProsima_user_DllExport void current_language(
+            std::string&& _current_language)
+    {
+        m_current_language = std::move(_current_language);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member current_language
+     * @return Constant reference to member current_language
+     */
+    eProsima_user_DllExport const std::string& current_language() const
+    {
+        return m_current_language;
+    }
+
+    /*!
+     * @brief This function returns a reference to member current_language
+     * @return Reference to member current_language
+     */
+    eProsima_user_DllExport std::string& current_language()
+    {
+        return m_current_language;
+    }
+
+
+    /*!
+     * @brief This function sets a value in member current_revision
+     * @param _current_revision New value for member current_revision
+     */
+    eProsima_user_DllExport void current_revision(
+            uint64_t _current_revision)
+    {
+        m_current_revision = _current_revision;
+    }
+
+    /*!
+     * @brief This function returns the value of member current_revision
+     * @return Value of member current_revision
+     */
+    eProsima_user_DllExport uint64_t current_revision() const
+    {
+        return m_current_revision;
+    }
+
+    /*!
+     * @brief This function returns a reference to member current_revision
+     * @return Reference to member current_revision
+     */
+    eProsima_user_DllExport uint64_t& current_revision()
+    {
+        return m_current_revision;
+    }
+
+
+    /*!
+     * @brief This function sets a value in member result
+     * @param _result New value for member result
+     */
+    eProsima_user_DllExport void result(
+            SystemLanguageResult _result)
+    {
+        m_result = _result;
+    }
+
+    /*!
+     * @brief This function returns the value of member result
+     * @return Value of member result
+     */
+    eProsima_user_DllExport SystemLanguageResult result() const
+    {
+        return m_result;
+    }
+
+    /*!
+     * @brief This function returns a reference to member result
+     * @return Reference to member result
+     */
+    eProsima_user_DllExport SystemLanguageResult& result()
+    {
+        return m_result;
+    }
+
+
+    /*!
+     * @brief This function copies the value in member detail
+     * @param _detail New value to be copied in member detail
+     */
+    eProsima_user_DllExport void detail(
+            const std::string& _detail)
+    {
+        m_detail = _detail;
+    }
+
+    /*!
+     * @brief This function moves the value in member detail
+     * @param _detail New value to be moved in member detail
+     */
+    eProsima_user_DllExport void detail(
+            std::string&& _detail)
+    {
+        m_detail = std::move(_detail);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member detail
+     * @return Constant reference to member detail
+     */
+    eProsima_user_DllExport const std::string& detail() const
+    {
+        return m_detail;
+    }
+
+    /*!
+     * @brief This function returns a reference to member detail
+     * @return Reference to member detail
+     */
+    eProsima_user_DllExport std::string& detail()
+    {
+        return m_detail;
+    }
+
+
+
+private:
+
+    VoiceHeader_ m_header;
+    std::string m_request_id;
+    std::string m_request_source;
+    std::string m_requested_language;
+    std::string m_current_language;
+    uint64_t m_current_revision{0};
+    SystemLanguageResult m_result{SystemLanguageResult::LANGUAGE_APPLIED};
+    std::string m_detail;
+
+};
+/*!
  * @brief This class represents the structure VoiceCommand_ defined by the user in the IDL file.
  * @ingroup voice
  */

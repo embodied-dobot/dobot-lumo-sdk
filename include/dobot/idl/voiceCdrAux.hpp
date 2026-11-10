@@ -24,36 +24,43 @@
 
 #include "voice.hpp"
 
-constexpr uint32_t dobot_msg_dds__AudioChunk__max_cdr_typesize {545UL};
+constexpr uint32_t dobot_msg_dds__SystemLanguageSet__max_cdr_typesize {808UL};
+constexpr uint32_t dobot_msg_dds__SystemLanguageSet__max_key_cdr_typesize {0UL};
+
+constexpr uint32_t dobot_msg_dds__AudioChunk__max_cdr_typesize {553UL};
 constexpr uint32_t dobot_msg_dds__AudioChunk__max_key_cdr_typesize {0UL};
 
 
-constexpr uint32_t dobot_msg_dds__VoiceCommand__max_cdr_typesize {1324UL};
+constexpr uint32_t dobot_msg_dds__VoiceCommand__max_cdr_typesize {1332UL};
 constexpr uint32_t dobot_msg_dds__VoiceCommand__max_key_cdr_typesize {0UL};
 
 
 
-constexpr uint32_t dobot_msg_dds__VADEvent__max_cdr_typesize {288UL};
+
+constexpr uint32_t dobot_msg_dds__VADEvent__max_cdr_typesize {296UL};
 constexpr uint32_t dobot_msg_dds__VADEvent__max_key_cdr_typesize {0UL};
 
 
-constexpr uint32_t dobot_msg_dds__TTSRequest__max_cdr_typesize {1584UL};
+constexpr uint32_t dobot_msg_dds__TTSRequest__max_cdr_typesize {1592UL};
 constexpr uint32_t dobot_msg_dds__TTSRequest__max_key_cdr_typesize {0UL};
 
-constexpr uint32_t dobot_msg_dds__VoiceState__max_cdr_typesize {544UL};
+constexpr uint32_t dobot_msg_dds__VoiceState__max_cdr_typesize {552UL};
 constexpr uint32_t dobot_msg_dds__VoiceState__max_key_cdr_typesize {0UL};
 
 constexpr uint32_t dobot_msg_dds__VoiceHeader__max_cdr_typesize {272UL};
 constexpr uint32_t dobot_msg_dds__VoiceHeader__max_key_cdr_typesize {0UL};
 
-constexpr uint32_t dobot_msg_dds__VoiceOutputEvent__max_cdr_typesize {1340UL};
+constexpr uint32_t dobot_msg_dds__VoiceOutputEvent__max_cdr_typesize {1348UL};
 constexpr uint32_t dobot_msg_dds__VoiceOutputEvent__max_key_cdr_typesize {0UL};
 
-constexpr uint32_t dobot_msg_dds__AckRequest__max_cdr_typesize {1060UL};
+constexpr uint32_t dobot_msg_dds__AckRequest__max_cdr_typesize {1068UL};
 constexpr uint32_t dobot_msg_dds__AckRequest__max_key_cdr_typesize {0UL};
 
 
-constexpr uint32_t dobot_msg_dds__VoiceControl__max_cdr_typesize {536UL};
+constexpr uint32_t dobot_msg_dds__SystemLanguageState__max_cdr_typesize {1592UL};
+constexpr uint32_t dobot_msg_dds__SystemLanguageState__max_key_cdr_typesize {0UL};
+
+constexpr uint32_t dobot_msg_dds__VoiceControl__max_cdr_typesize {544UL};
 constexpr uint32_t dobot_msg_dds__VoiceControl__max_key_cdr_typesize {0UL};
 
 
@@ -66,6 +73,14 @@ class CdrSizeCalculator;
 eProsima_user_DllExport void serialize_key(
         eprosima::fastcdr::Cdr& scdr,
         const dobot::msg::dds_::VoiceHeader_& data);
+
+eProsima_user_DllExport void serialize_key(
+        eprosima::fastcdr::Cdr& scdr,
+        const dobot::msg::dds_::SystemLanguageSet_& data);
+
+eProsima_user_DllExport void serialize_key(
+        eprosima::fastcdr::Cdr& scdr,
+        const dobot::msg::dds_::SystemLanguageState_& data);
 
 eProsima_user_DllExport void serialize_key(
         eprosima::fastcdr::Cdr& scdr,

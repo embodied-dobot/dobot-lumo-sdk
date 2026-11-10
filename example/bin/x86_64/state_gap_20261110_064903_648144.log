@@ -1,0 +1,19 @@
+订阅 lower/upper/main/imu。回调在监听线程。每秒只打印这一秒。超过 5ms 会立刻打印前后时间戳。
+终端输出同时写入 /root/workspace/dobot-sdk/example/bin/x86_64/state_gap_20261110_064903_648144.log
+一直运行。Ctrl+C 后打印全程汇总。
+lower matched=1 frames=873 msg>2ms=16 msg>5ms=0 recv>2ms=0 recv>5ms=0 | upper matched=1 frames=873 msg>2ms=16 msg>5ms=0 recv>2ms=0 recv>5ms=0
+main matched=1 frames=873 msg>2ms=16 msg>5ms=0 recv>2ms=0 recv>5ms=0 | imu matched=1 frames=873 msg>2ms=94 msg>5ms=0 recv>2ms=0 recv>5ms=0
+lower matched=1 frames=996 msg>2ms=17 msg>5ms=0 recv>2ms=0 recv>5ms=0 | upper matched=1 frames=996 msg>2ms=17 msg>5ms=0 recv>2ms=0 recv>5ms=0
+main matched=1 frames=996 msg>2ms=17 msg>5ms=0 recv>2ms=0 recv>5ms=0 | imu matched=1 frames=995 msg>2ms=67 msg>5ms=0 recv>2ms=0 recv>5ms=0
+lower matched=1 frames=995 msg>2ms=18 msg>5ms=0 recv>2ms=0 recv>5ms=0 | upper matched=1 frames=995 msg>2ms=18 msg>5ms=0 recv>2ms=0 recv>5ms=0
+main matched=1 frames=995 msg>2ms=18 msg>5ms=0 recv>2ms=0 recv>5ms=0 | imu matched=1 frames=996 msg>2ms=51 msg>5ms=0 recv>2ms=0 recv>5ms=0
+lower matched=1 frames=995 msg>2ms=9 msg>5ms=0 recv>2ms=0 recv>5ms=0 | upper matched=1 frames=995 msg>2ms=9 msg>5ms=0 recv>2ms=0 recv>5ms=0
+main matched=1 frames=995 msg>2ms=9 msg>5ms=0 recv>2ms=0 recv>5ms=0 | imu matched=1 frames=995 msg>2ms=50 msg>5ms=0 recv>2ms=0 recv>5ms=0
+======== 汇总 ========
+运行时长 4.505 s
+avg/max 是相邻帧间隔，单位微秒。>2ms 含 >5ms。
+lower matched=1 frames=4357 msg>2ms=66 msg>5ms=0 msg_avg_us=1024 msg_max_us=4035 recv>2ms=0 recv>5ms=0 recv_avg_us=1005 recv_max_us=1767
+upper matched=1 frames=4357 msg>2ms=66 msg>5ms=0 msg_avg_us=1024 msg_max_us=4035 recv>2ms=0 recv>5ms=0 recv_avg_us=1005 recv_max_us=1922
+main matched=1 frames=4357 msg>2ms=66 msg>5ms=0 msg_avg_us=1024 msg_max_us=4035 recv>2ms=0 recv>5ms=0 recv_avg_us=1005 recv_max_us=1946
+imu matched=1 frames=4357 msg>2ms=287 msg>5ms=0 msg_avg_us=2000 msg_max_us=4000 recv>2ms=0 recv>5ms=0 recv_avg_us=1005 recv_max_us=1956
+终端输出已写入 /root/workspace/dobot-sdk/example/bin/x86_64/state_gap_20261110_064903_648144.log
