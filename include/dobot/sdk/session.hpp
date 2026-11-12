@@ -23,17 +23,17 @@ class DataReader;
 
 namespace dobot::sdk {
 
-// 二开程序放在哪。两边用同一个 Session，默认地址不同。
+// Where the application runs. Both sides use the same Session; only the default addresses differ.
 enum class RunWhere {
-    kComputer,  // 用户电脑，网线连机器人
-    kRobot,     // 程序跑在机器人本机
+    kComputer,  // User PC, connected to the robot by Ethernet
+    kRobot,     // Program runs on the robot itself
 };
 
-// robot_ip 只给 RPC。留空时，电脑用机型默认 IP，机器人本机用 127.0.0.1。
-// domain_id 默认 0。network_interface 留空时，所有网卡都参与 DDS 发现。
-// 话题 QoS 用编译进库的配置，按「话题名.reader」和「话题名.writer」取。
-// async_subscribe 默认 false：订阅回调在 Fast DDS 监听线程里、take 之后立刻执行。
-// 设为 true 时，回调改到有序队列的 worker 上。
+// robot_ip is used by RPC only. When empty, a PC uses the model's default IP and the robot itself uses 127.0.0.1.
+// domain_id defaults to 0. When network_interface is empty, all network interfaces take part in DDS discovery.
+// Topic QoS comes from the config compiled into the library, looked up as "<topic>.reader" and "<topic>.writer".
+// async_subscribe defaults to false: subscribe callbacks run on the Fast DDS listener thread, right after take.
+// When true, callbacks run on a worker of an ordered queue instead.
 struct SessionConfig {
     RunWhere where = RunWhere::kComputer;
     std::string robot_ip;
@@ -43,18 +43,18 @@ struct SessionConfig {
     bool async_subscribe = false;
 };
 
-// 连上一台机器人。一个 Session 拥有这条连接上的 RPC 和 DDS。
-// 一个进程要连两台，就建两个 Session。不要做成进程里唯一的全局对象。
+// Connection to one robot. A Session owns the RPC and DDS on that connection.
+// To connect to two robots from one process, create two Sessions. Do not make it a process-wide singleton.
 //
-// 应用代码从这里进：
-//   session.Init(机型描述, 配置)
+// Application entry points:
+//   session.Init(robot profile, config)
 //   session.motion().SetRobotMode(...)
-//   session.rpc().GetFsmId()   // 薄 RPC，调试或未封装方法
-//   auto state = session.Subscribe<消息的 PubSubType>(话题名)
+//   session.rpc().GetFsmId()   // thin RPC, for debugging or methods not yet wrapped
+//   auto state = session.Subscribe<message PubSubType>(topic name)
 //   state.Latest()
-//   session.Publish<消息的 PubSubType>(话题名).Write(cmd)
+//   session.Publish<message PubSubType>(topic name).Write(cmd)
 //
-// Init 和 Shutdown 在业务线程调用，不要在订阅回调里调用。
+// Call Init and Shutdown from an application thread, not from a subscribe callback.
 class Session {
 public:
     Session();
@@ -63,9 +63,9 @@ public:
     Session(const Session&) = delete;
     Session& operator=(const Session&) = delete;
 
-    // 打开 RPC 和 DDS。重复初始化返回 false，先 Shutdown 再 Init。
+    // Open RPC and DDS. Returns false if already initialized; call Shutdown before Init again.
     bool Init(const RobotProfile& profile, const SessionConfig& config, std::string* error);
-    // 等正在执行的回调结束，再释放本会话的 DDS 和 RPC。不要求机器人停机。
+    // Wait for running callbacks to finish, then release this session's DDS and RPC. Does not require the robot to stop.
     void Shutdown();
 
     bool open() const { return open_.load(); }
@@ -74,18 +74,18 @@ public:
     MotionRpc& rpc() { return motion_; }
     const MotionRpc& rpc() const { return motion_; }
 
-    // 语义化运控：模式、预设动作、舞蹈。内部走 MotionRpc。
+    // Semantic locomotion API: modes, preset actions and dances. Uses MotionRpc internally.
     dobot::motion::Motion motion() const { return dobot::motion::Motion(motion_); }
 
-    // 给某一台独有的新 RPC 用。两台都有的方法加到 MotionRpc，不要从这里绕过。
+    // For new RPCs that exist on one model only. Add methods shared by both models to MotionRpc instead of bypassing it here.
     RpcResult Call(const std::string& method, const nlohmann::json& params, int timeout_ms = 3000) const;
 
-    // 模板参数是生成代码里的 PubSubType，例如 dobot::msg::dds_::LowerState_PubSubType。
-    // QoS 使用库内配置的「话题名.reader」。同一 PubSubType 只能订一个话题。
+    // The template parameter is the PubSubType from generated code, e.g. dobot::msg::dds_::LowerState_PubSubType.
+    // QoS uses the built-in "<topic>.reader" config. One PubSubType can subscribe to only one topic.
     template <typename PubSubType>
     Subscriber<typename PubSubType::type> Subscribe(const std::string& topic);
 
-    // QoS 使用库内配置的「话题名.writer」。一条话题只建一个发布端，控制环里反复 Write。
+    // QoS uses the built-in "<topic>.writer" config. Only one publisher is created per topic; call Write repeatedly in the control loop.
     template <typename PubSubType>
     Publisher<typename PubSubType::type> Publish(const std::string& topic);
 

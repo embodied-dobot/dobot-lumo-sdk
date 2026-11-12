@@ -11,7 +11,7 @@ namespace dobot::sdk {
 
 namespace detail {
 
-// 一条订阅在 SDK 内部的状态。dobot_dds 的 worker 更新 latest，再调用 On()。
+// Internal state of one subscription in the SDK. A dobot_dds worker updates latest, then calls On().
 template <typename Msg>
 struct SubState {
     mutable std::mutex mu;
@@ -23,12 +23,12 @@ struct SubState {
 
 }  // namespace detail
 
-// 一条状态订阅。拷贝出来的对象看的是同一条订阅。
-// 周期控制读 Latest()。急停、故障这类事件再用 On()。
+// One state subscription. Copies refer to the same subscription.
+// Periodic control reads Latest(). Use On() for events such as e-stop and faults.
 template <typename Msg>
 class Subscriber {
 public:
-    // 还没有数据时返回空。缺失不会变成数值 0。
+    // Returns empty when no data has arrived. Missing data is never turned into the value 0.
     std::optional<Msg> Latest() const {
         if (!state_) {
             return std::nullopt;
@@ -37,7 +37,7 @@ public:
         return state_->latest;
     }
 
-    // 当前匹配上的对端数量。0 表示还没和对端连上。
+    // Number of currently matched peers. 0 means not yet connected to any peer.
     int Matched() const {
         if (!state_ || !state_->matched_count) {
             return 0;
@@ -45,7 +45,7 @@ public:
         return state_->matched_count();
     }
 
-    // 等到第一帧有效数据，或超时。已经有数据时立刻返回 true。
+    // Wait for the first valid sample, or time out. Returns true immediately if data is already available.
     bool WaitForData(std::chrono::milliseconds timeout) const {
         if (!state_) {
             return false;
@@ -54,8 +54,8 @@ public:
         return state_->cv.wait_for(lock, timeout, [&] { return state_->latest.has_value(); });
     }
 
-    // 事件回调。跑在 dobot_dds 的有序 worker 上，不跑在 DDS 收取线程上。
-    // 回调里不要调用 Shutdown、不要再订话题、不要调用 RPC，也不要长时间卡住。
+    // Event callback. Runs on an ordered dobot_dds worker, not on the DDS receive thread.
+    // Inside the callback, do not call Shutdown, subscribe to more topics, or call RPC, and do not block for long.
     void On(std::function<void(const Msg&)> callback) {
         if (!state_) {
             return;
@@ -72,8 +72,8 @@ private:
     std::shared_ptr<detail::SubState<Msg>> state_;
 };
 
-// 一条命令发布。控制环里直接 Write，命令不排队，新的一帧盖住旧的一帧。
-// Write 返回 true 只表示本地交给了 DDS，不表示机器人已经执行。
+// One command publisher. Call Write directly in the control loop; commands are not queued, and a new sample overwrites the previous one.
+// Write returning true only means the sample was handed to DDS locally, not that the robot has executed it.
 template <typename Msg>
 class Publisher {
 public:

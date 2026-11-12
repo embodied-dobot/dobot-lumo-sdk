@@ -2,8 +2,8 @@
 
 namespace dobot::sdk {
 
-// 一台机器人的连接描述。IP 和 RPC 端口放在这里。
-// 两台机器行为相同时共用同一份实现，只换这份描述。
+// Connection profile of one robot. The IP and RPC port live here.
+// Robots with identical behavior share one implementation and differ only in this profile.
 struct RobotProfile {
     const char* model = "";
     const char* default_robot_ip = "";

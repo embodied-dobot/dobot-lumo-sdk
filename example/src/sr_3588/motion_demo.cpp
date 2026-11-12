@@ -1,5 +1,5 @@
-// SR_3588 语义化运控示例：查询状态机、切换模式、预设动作、舞蹈。
-// 已知编号走 session.motion()。对不上这些接口的编号才走 session.rpc().SetFsmId。
+// SR_3588 semantic motion control example: query the FSM, switch mode, preset actions, dances.
+// Known IDs go through session.motion(). Only IDs that match none of these interfaces go through session.rpc().SetFsmId.
 #include "dobot/motion/motion.hpp"
 #include "dobot/robot/sr_3588/topics.hpp"
 #include "dobot/sdk/rpc_client.hpp"
@@ -15,19 +15,19 @@ namespace {
 
 void Usage(const char* argv0) {
     std::cerr
-        << "用法: " << argv0
+        << "Usage: " << argv0
         << " [--query] [--list]"
         << " [--mode zero|damp|debug|ready|stand|walk]"
         << " [--action enter-box|lie|prone|exit-box|stand-supine|stand-prone]"
-        << " [--dance 350-400] [--fsm-id 编号]"
+        << " [--dance 350-400] [--fsm-id <id>]"
         << " [--timeout-ms 3000] [--ip " << dobot::robot::sr_3588::kDefaultRobotIp
-        << "] [--on-robot] [--domain 0] [--nic 网卡名]\n"
-        << "默认打印当前状态机。--list 打印全部状态机。\n"
-        << "--mode、--action、--dance、--fsm-id 只能指定一个，执行后再打印当前状态机。\n"
-        << "--mode 走 SetRobotMode，--action 走六个预设动作，--dance 走 PlayDance。\n"
-        << "--fsm-id 能对应到上述接口时走对应接口，其余编号走 rpc().SetFsmId。\n"
-        << "自主出箱、仰姿起身、俯姿起身返回后不要立刻再切到站立。\n"
-        << "示例: " << argv0 << "\n"
+        << "] [--on-robot] [--domain 0] [--nic <nic>]\n"
+        << "Prints the current FSM by default. --list prints all FSMs.\n"
+        << "Specify only one of --mode, --action, --dance, --fsm-id; the current FSM is printed after it runs.\n"
+        << "--mode uses SetRobotMode, --action uses the six preset actions, --dance uses PlayDance.\n"
+        << "--fsm-id uses the matching interface above when there is one; other IDs go through rpc().SetFsmId.\n"
+        << "After exit-box, stand-supine or stand-prone returns, do not switch to stand immediately.\n"
+        << "Example: " << argv0 << "\n"
         << "      " << argv0 << " --list\n"
         << "      " << argv0 << " --mode stand\n"
         << "      " << argv0 << " --action lie\n"
@@ -154,7 +154,7 @@ int32_t SwitchByFsmId(const dobot::sdk::Session& session, const dobot::motion::M
 }
 
 int Fail(const std::string& label, int32_t code) {
-    std::cerr << label << " 失败 " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
+    std::cerr << label << " failed " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
     return 1;
 }
 
@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -199,21 +199,21 @@ int main(int argc, char** argv) {
         } else if (arg == "--mode") {
             mode_name = need("--mode");
             if (!ParseMode(mode_name, &mode)) {
-                std::cerr << "未知模式: " << mode_name << "\n";
+                std::cerr << "Unknown mode: " << mode_name << "\n";
                 return 2;
             }
             mode_set = true;
         } else if (arg == "--action") {
             const std::string action_name = need("--action");
             if (!ParseAction(action_name, &action, &action_label)) {
-                std::cerr << "未知动作: " << action_name << "\n";
+                std::cerr << "Unknown action: " << action_name << "\n";
                 return 2;
             }
             action_set = true;
         } else if (arg == "--dance") {
             dance_id = static_cast<int32_t>(std::stoi(need("--dance")));
             if (dance_id < 350 || dance_id > 400) {
-                std::cerr << "--dance 须在 350–400\n";
+                std::cerr << "--dance must be in 350-400\n";
                 return 2;
             }
             dance_set = true;
@@ -232,7 +232,7 @@ int main(int argc, char** argv) {
         } else if (arg == "--nic") {
             network_interface = need("--nic");
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -240,7 +240,7 @@ int main(int argc, char** argv) {
 
     const int selected = (mode_set ? 1 : 0) + (action_set ? 1 : 0) + (dance_set ? 1 : 0) + (fsm_set ? 1 : 0);
     if (selected > 1) {
-        std::cerr << "--mode、--action、--dance、--fsm-id 只能指定一个\n";
+        std::cerr << "Specify only one of --mode, --action, --dance, --fsm-id\n";
         return 2;
     }
 
@@ -279,7 +279,7 @@ int main(int argc, char** argv) {
         if (code != 0) {
             return Fail(label, code);
         }
-        std::cout << label << " 成功\n";
+        std::cout << label << " succeeded\n";
     }
 
     const bool do_query = query_requested || switched || !list;
@@ -289,7 +289,7 @@ int main(int argc, char** argv) {
         if (code != 0) {
             return Fail("GetFsmId", code);
         }
-        std::cout << "当前状态机 " << current_id << " (" << dobot::motion::Motion::FsmIdToString(current_id) << ")\n";
+        std::cout << "Current FSM " << current_id << " (" << dobot::motion::Motion::FsmIdToString(current_id) << ")\n";
     }
 
     if (list) {
@@ -298,11 +298,11 @@ int main(int argc, char** argv) {
         if (code != 0) {
             return Fail("GetFsmList", code);
         }
-        std::cout << "状态机列表\n";
+        std::cout << "FSM list\n";
         for (const dobot::motion::FsmInfo& item : fsm_list) {
             std::cout << item.fsm_id << " " << item.name;
             if (item.is_dance) {
-                std::cout << " 舞蹈 " << item.dance_name << " " << item.model_file;
+                std::cout << " dance " << item.dance_name << " " << item.model_file;
             }
             std::cout << "\n";
         }

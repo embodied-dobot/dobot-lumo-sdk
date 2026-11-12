@@ -1,6 +1,6 @@
-// SR_thor：订阅 rt/set/fsm/id，只在技能开始和结束时打印。
-// 这个话题由运控算法发布。current_action 为空或 "\0" 表示不可播放，
-// "enable" 表示可播放但没在播，其它非空字符串是正在播放的技能名。
+// SR_thor: Subscribes to rt/set/fsm/id and prints only when a skill starts or ends.
+// This topic is published by the motion control algorithm. current_action empty or "\0" means nothing can be played,
+// "enable" means playable but idle; any other non-empty string is the skill currently playing.
 #include "dobot/robot/sr_thor/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -23,10 +23,10 @@ volatile std::sig_atomic_t g_stop = 0;
 void OnSignal(int) { g_stop = 1; }
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0 << " [--all] [--seconds 0] [--on-robot] [--domain 0] [--nic 网卡名]\n"
-              << "订阅 rt/set/fsm/id。技能名出现时打印开始，回到 enable 或空时打印结束。\n"
-              << "--all 时每一帧都打印，状态没变也打印。\n"
-              << "--seconds 0 表示一直运行，Ctrl+C 结束。回调里不要再调用 RPC 或 Shutdown。\n";
+    std::cerr << "Usage: " << argv0 << " [--all] [--seconds 0] [--on-robot] [--domain 0] [--nic <nic>]\n"
+              << "Subscribes to rt/set/fsm/id. Prints start when a skill name appears, and end when it returns to enable or empty.\n"
+              << "With --all, every frame is printed, even if the state did not change.\n"
+              << "--seconds 0 runs until Ctrl+C. Do not call RPC or Shutdown inside the callback.\n";
 }
 
 bool IsIdle(const std::string& action) {
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
         } else if (arg == "--all") {
             print_all = true;
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 
     auto fsm = session.Subscribe<dobot::msg::dds_::SetFsmId_PubSubType>(dobot::robot::sr_thor::kTopicSetFsmId);
     if (!fsm.valid()) {
-        std::cerr << "创建订阅失败\n";
+        std::cerr << "Failed to create subscriber\n";
         return 1;
     }
 
@@ -103,34 +103,34 @@ int main(int argc, char** argv) {
         const uint16_t fsm_id = msg.id();
         std::lock_guard<std::mutex> lock(mu);
         if (print_all) {
-            std::cout << "收到 id=" << fsm_id << " current_action=" << Show(action) << "\n";
+            std::cout << "Received id=" << fsm_id << " current_action=" << Show(action) << "\n";
         }
         if (!seen) {
             seen = true;
             previous = action;
             if (IsPlaying(action)) {
-                std::cout << "动作已在进行 " << action << " 状态机 " << fsm_id << "\n";
+                std::cout << "Action already in progress " << action << " FSM " << fsm_id << "\n";
             }
             return;
         }
         const bool was_playing = IsPlaying(previous);
         const bool now_playing = IsPlaying(action);
         if (!was_playing && now_playing) {
-            std::cout << "动作开始 " << action << " 状态机 " << fsm_id << "\n";
+            std::cout << "Action started " << action << " FSM " << fsm_id << "\n";
         } else if (was_playing && !now_playing) {
-            std::cout << "动作结束 " << previous << " -> " << Show(action) << " 状态机 " << fsm_id << "\n";
+            std::cout << "Action ended " << previous << " -> " << Show(action) << " FSM " << fsm_id << "\n";
         } else if (was_playing && now_playing && previous != action) {
-            std::cout << "动作结束 " << previous << " 状态机 " << fsm_id << "\n";
-            std::cout << "动作开始 " << action << " 状态机 " << fsm_id << "\n";
+            std::cout << "Action ended " << previous << " FSM " << fsm_id << "\n";
+            std::cout << "Action started " << action << " FSM " << fsm_id << "\n";
         }
         previous = action;
     });
 
-    std::cout << "已订阅 " << dobot::robot::sr_thor::kTopicSetFsmId << "。另开程序播放技能。";
+    std::cout << "Subscribed to " << dobot::robot::sr_thor::kTopicSetFsmId << ". Play a skill from another program. ";
     if (print_all) {
-        std::cout << "将打印每一帧。\n";
+        std::cout << "Every frame will be printed.\n";
     } else {
-        std::cout << "只在技能开始和结束时打印。\n";
+        std::cout << "Printing only when a skill starts or ends.\n";
     }
     const auto deadline = seconds > 0 ? std::chrono::steady_clock::now() + std::chrono::seconds(seconds)
                                        : std::chrono::steady_clock::time_point::max();

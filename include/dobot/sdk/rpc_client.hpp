@@ -6,7 +6,7 @@
 
 namespace dobot::sdk {
 
-// 和机载 JSON-RPC 客户端一致的错误码。0–6 是传输和通用失败，100–106 是运控业务失败。各型号共用。
+// Error codes consistent with the onboard JSON-RPC client. 0-6 are transport and generic failures; 100-106 are locomotion business failures. Shared by all models.
 enum class RpcError {
     kOk = 0,
     kSocket = 1,
@@ -29,22 +29,22 @@ struct RpcResult {
     std::string message;
     nlohmann::json response = nlohmann::json::object();
 
-    // 调用成功：错误码为 0，且响应里有 result。result 为 -1、JSON-RPC error，或运控方法判定业务失败时为 false。
+    // Call succeeded: error code is 0 and the response contains result. False when result is -1, on a JSON-RPC error, or when a locomotion method reports a business failure.
     bool ok() const { return error == RpcError::kOk && response.contains("result"); }
-    // 取出响应里的 result。没有该字段时抛出异常，调用前先用 ok() 判断。
+    // Get result from the response. Throws if the field is missing; check ok() first.
     const nlohmann::json& result() const { return response.at("result"); }
 };
 
-// 每次调用新建一条 TCP 连接，发送一行 JSON-RPC 2.0，读到换行或一个完整 JSON 对象。
-// 只负责传输。两台机器人共用的方法在 MotionRpc，由 Session::rpc() 给出。
+// Each call opens a new TCP connection, sends one line of JSON-RPC 2.0, and reads until a newline or a complete JSON object.
+// Transport only. Methods shared by both robots live in MotionRpc, obtained from Session::rpc().
 class RpcClient {
 public:
-    // 保存机器人地址。构造时不建连接，连接发生在每次 Call 里。
+    // Store the robot address. No connection is made at construction; each Call connects.
     RpcClient(std::string ip, int port);
 
-    // 发起一次 JSON-RPC 2.0 调用。params 为 null 时按空对象 {} 发送。
-    // timeout_ms 覆盖连接、发送和接收，单位毫秒。
-    // result 为整数 -1 时 error 为 kServerInternal。响应只有 JSON-RPC error、没有 result 时 error 为 kUnexpected。
+    // Make one JSON-RPC 2.0 call. A null params is sent as an empty object {}.
+    // timeout_ms covers connect, send and receive, in milliseconds.
+    // error is kServerInternal when result is the integer -1. error is kUnexpected when the response has only a JSON-RPC error and no result.
     RpcResult Call(const std::string& method, const nlohmann::json& params, int timeout_ms = 3000) const;
 
 private:
@@ -52,7 +52,7 @@ private:
     int port_;
 };
 
-// 把 RpcError 转成稳定短字符串。未知值返回 "unknown"。
+// Convert an RpcError to a stable short string. Unknown values return "unknown".
 const char* RpcErrorName(RpcError error);
 
 }  // namespace dobot::sdk

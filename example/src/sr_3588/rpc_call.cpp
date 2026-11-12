@@ -1,6 +1,6 @@
-// SR_3588 的原始 JSON-RPC 示例。
-// 查状态机、切模式、预设动作、舞蹈用 motion_demo；速度用 walk_demo。
-// 这里留给 session.rpc() 还没有单独示例的方法，以及还没有成员函数的方法。
+// SR_3588 raw JSON-RPC example.
+// For querying the FSM, switching mode, preset actions and dances use motion_demo; for velocity use walk_demo.
+// This one is for session.rpc() methods that have no dedicated example yet, and methods that have no member function yet.
 #include "dobot/robot/sr_3588/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -13,12 +13,12 @@ namespace {
 
 void Usage(const char* argv0) {
     std::cerr
-        << "用法: " << argv0
+        << "Usage: " << argv0
         << " [--ip " << dobot::robot::sr_3588::kDefaultRobotIp << "] [--port " << dobot::robot::sr_3588::kAlgsRpcPort
-        << "] --method 方法名 [--params '{}'] [--timeout-ms 3000] [--on-robot] [--domain 0] [--nic 网卡名]\n"
-        << "不填 --ip 时，电脑上用机型默认地址，--on-robot 时用 127.0.0.1。\n"
-        << "查状态机、切模式、预设动作和舞蹈用 motion_demo，速度用 walk_demo。\n"
-        << "示例: " << argv0 << " --method ReloadArmSkillsData\n"
+        << "] --method <name> [--params '{}'] [--timeout-ms 3000] [--on-robot] [--domain 0] [--nic <nic>]\n"
+        << "Without --ip, a PC uses the model's default address; with --on-robot, 127.0.0.1 is used.\n"
+        << "For querying the FSM, switching mode, preset actions and dances use motion_demo; for velocity use walk_demo.\n"
+        << "Example: " << argv0 << " --method ReloadArmSkillsData\n"
         << "      " << argv0 << " --method ExecuteAction --params '{\"file_path\":\"skill.csv\"}'\n";
 }
 
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -67,13 +67,13 @@ int main(int argc, char** argv) {
         } else if (arg == "--timeout-ms") {
             timeout_ms = std::stoi(need("--timeout-ms"));
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
     }
     if (!method_set || method.empty()) {
-        std::cerr << "缺少 --method。查状态机和切模式请用 motion_demo，速度请用 walk_demo。\n";
+        std::cerr << "Missing --method. To query the FSM or switch mode use motion_demo; for velocity use walk_demo.\n";
         Usage(argv[0]);
         return 2;
     }
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
     try {
         params = nlohmann::json::parse(params_text);
     } catch (const std::exception& ex) {
-        std::cerr << "params 不是 JSON: " << ex.what() << "\n";
+        std::cerr << "params is not valid JSON: " << ex.what() << "\n";
         return 2;
     }
 
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
     }
     const dobot::sdk::RpcResult result = session.Call(method, params, timeout_ms);
     if (result.error != dobot::sdk::RpcError::kOk) {
-        std::cerr << "RPC 失败 " << dobot::sdk::RpcErrorName(result.error) << ": " << result.message << "\n";
+        std::cerr << "RPC failed " << dobot::sdk::RpcErrorName(result.error) << ": " << result.message << "\n";
         if (!result.response.is_null() && !result.response.empty()) {
             std::cerr << result.response.dump() << "\n";
         }

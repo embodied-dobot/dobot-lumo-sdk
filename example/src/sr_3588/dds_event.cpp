@@ -1,5 +1,5 @@
-// SR_3588 的事件订阅示例。急停不是周期控制量，来一帧就进 On()。
-// 关节状态不要这样写，用 dds_echo 里的 Latest()。
+// SR_3588 event subscription example. The e-stop is not a periodic control value; On() runs for every frame received.
+// Do not handle joint state this way; use Latest() as in dds_echo.
 #include "dobot/robot/sr_3588/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -16,10 +16,10 @@
 namespace {
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0 << " [--seconds 5] [--on-robot] [--domain 0] [--nic 网卡名]\n"
-              << "订阅 Mcu/Estop。收到一帧就在回调里打印。0 是急停，1 是正常。\n"
-              << "DDS domain 默认 0。网卡默认全部，多网卡时加 --nic。\n"
-              << "回调里不要再调用 RPC 或 Shutdown。\n";
+    std::cerr << "Usage: " << argv0 << " [--seconds 5] [--on-robot] [--domain 0] [--nic <nic>]\n"
+              << "Subscribes to Mcu/Estop and prints each frame in the callback. 0 means e-stop, 1 means normal.\n"
+              << "DDS domain defaults to 0. All network interfaces are used by default; with several, add --nic.\n"
+              << "Do not call RPC or Shutdown inside the callback.\n";
 }
 
 }  // namespace
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
         } else if (arg == "--seconds") {
             seconds = std::stoi(need("--seconds"));
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -63,18 +63,18 @@ int main(int argc, char** argv) {
 
     auto estop = session.Subscribe<dobot::msg::dds_::Estop_PubSubType>(dobot::robot::sr_3588::kTopicMcuEstop);
     if (!estop.valid()) {
-        std::cerr << "创建订阅失败\n";
+        std::cerr << "Failed to create subscriber\n";
         return 1;
     }
 
     std::atomic<int> callbacks{0};
     estop.On([&callbacks](const dobot::msg::dds_::Estop_& msg) {
         const int n = ++callbacks;
-        std::cout << "回调 #" << n << " stop1=" << static_cast<unsigned>(msg.stop1())
+        std::cout << "Callback #" << n << " stop1=" << static_cast<unsigned>(msg.stop1())
                   << " stop2=" << static_cast<unsigned>(msg.stop2()) << "\n";
     });
 
-    std::cout << "等待 Mcu/Estop 回调，最长 " << seconds << " 秒\n";
+    std::cout << "Waiting for Mcu/Estop callbacks, up to " << seconds << " s\n";
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
     while (std::chrono::steady_clock::now() < deadline && callbacks.load() == 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
                   << " stop2=" << static_cast<unsigned>(latest->stop2()) << "\n";
     }
     if (callbacks.load() == 0) {
-        std::cerr << "没有收到急停话题。请确认 --domain 与机器人一致。多网卡时用 --nic 指定接机器人的网卡。\n";
+        std::cerr << "No e-stop topic received. Check that --domain matches the robot. With several network interfaces, use --nic to pick the one connected to the robot.\n";
         return 1;
     }
     return 0;

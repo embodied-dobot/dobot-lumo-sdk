@@ -1,4 +1,4 @@
-// SR_thor 的状态订阅示例。周期数据用 Latest()，不在回调里做处理。
+// SR_thor state subscription example. Use Latest() for periodic data; do no processing in the callback.
 #include "dobot/robot/sr_thor/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -19,9 +19,9 @@ namespace {
 namespace dds_ = dobot::msg::dds_;
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0 << " [--seconds 5] [--on-robot] [--domain 0] [--nic 网卡名]\n"
-              << "订阅 rt/lower/state 和 rt/upper/state，打印收到的关节角。\n"
-              << "DDS domain 默认 0。网卡默认全部，多网卡时加 --nic。\n";
+    std::cerr << "Usage: " << argv0 << " [--seconds 5] [--on-robot] [--domain 0] [--nic <nic>]\n"
+              << "Subscribes to rt/lower/state and rt/upper/state and prints the received joint angles.\n"
+              << "DDS domain defaults to 0. All network interfaces are used by default; with several, add --nic.\n";
 }
 
 template <typename Msg>
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
         } else if (arg == "--seconds") {
             seconds = std::stoi(need("--seconds"));
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -77,11 +77,11 @@ int main(int argc, char** argv) {
     auto lower = session.Subscribe<dds_::LowerState_PubSubType>(dobot::robot::sr_thor::kTopicLowerState);
     auto upper = session.Subscribe<dds_::UpperState_PubSubType>(dobot::robot::sr_thor::kTopicUpperState);
     if (!lower.valid() || !upper.valid()) {
-        std::cerr << "创建订阅失败\n";
+        std::cerr << "Failed to create subscriber\n";
         return 1;
     }
 
-    std::cout << "等待 rt/lower/state 和 rt/upper/state，最长 " << seconds << " 秒\n";
+    std::cout << "Waiting for rt/lower/state and rt/upper/state, up to " << seconds << " s\n";
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
     while (std::chrono::steady_clock::now() < deadline) {
         if (lower.Latest() && upper.Latest()) {
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
     const auto lower_sample = lower.Latest();
     const auto upper_sample = upper.Latest();
     if (!lower_sample && !upper_sample) {
-        std::cerr << "没有收到状态。请确认 --domain 与机器人一致。多网卡时用 --nic 指定接机器人的网卡。\n";
+        std::cerr << "No state received. Check that --domain matches the robot. With several network interfaces, use --nic to pick the one connected to the robot.\n";
         return 1;
     }
     if (lower_sample) {

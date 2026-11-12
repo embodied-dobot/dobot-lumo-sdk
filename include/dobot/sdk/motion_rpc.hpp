@@ -10,31 +10,31 @@ namespace dobot::sdk {
 
 class Session;
 
-// 两台机器人相同的运控方法，只实现这一份。
-// 两台都有的新方法加在这里。只有某一台才有的方法写到该型号目录，内部调用 Session::Call。
+// Locomotion methods identical on both robots, implemented once.
+// Add new methods shared by both models here. Methods specific to one model go in that model's directory and call Session::Call internally.
 class MotionRpc {
 public:
     MotionRpc() = default;
 
-    // 直接发一个 JSON-RPC 方法。给还没封装成函数的新接口用。
+    // Send a JSON-RPC method directly. For new interfaces not yet wrapped as functions.
     RpcResult Call(const std::string& method, const nlohmann::json& params, int timeout_ms = 3000) const;
 
-    // 查询当前运控状态机编号。成功时 result 就是编号，0 也是合法编号。
+    // Query the current locomotion FSM id. On success, result is the id; 0 is a valid id.
     RpcResult GetFsmId(int timeout_ms = 3000) const;
-    // 切换运控状态机。result 为 1 表示成功，0 表示切换失败。
-    // 进入 Mini 站立模式使用 300，之后才能发 rt/stand/cmd。
+    // Switch the locomotion FSM. result 1 means success; 0 means the transition failed.
+    // Use 300 to enter Mini standing mode; only then can rt/stand/cmd be sent.
     RpcResult SetFsmId(int32_t fsm_id, int timeout_ms = 3000) const;
-    // 查询当前全部状态机。成功时 result 是对象数组。不是数组时返回 kJson。
+    // Query all current FSMs. On success, result is an array of objects. Returns kJson if it is not an array.
     RpcResult GetFsmList(int timeout_ms = 3000) const;
-    // vx 向前为正，m/s；vy 向左为正，m/s；vyaw 逆时针为正，rad/s。
-    // duration 是保持时间，单位秒，超时后停止。停机用 SetVel(0, 0, 0)。
+    // vx is positive forward, in m/s; vy is positive left, in m/s; vyaw is positive counterclockwise, in rad/s.
+    // duration is the hold time in seconds; motion stops after it expires. To stop, use SetVel(0, 0, 0).
     RpcResult SetVel(float vx, float vy, float vyaw, float duration = 1.0f, int timeout_ms = 3000) const;
-    // 重新加载技能列表。调用前把轨迹 csv 放到机器人上的技能目录。
+    // Reload the skill list. Before calling, put the trajectory CSV files in the skill directory on the robot.
     RpcResult ReloadArmSkillsData(int timeout_ms = 3000) const;
-    // 下发按键到技能名的映射。只覆盖本次出现的键。
+    // Send the mapping from keys to skill names. Only the keys present in this call are overwritten.
     RpcResult SendActionMapping(const std::map<std::string, std::string>& action_mapping, int timeout_ms = 3000) const;
-    // 播放技能目录里的动作。file_path 是文件名，不是调用方本机路径。
-    // timeout_ms 只覆盖这次 RPC 往返，不表示动作已经播完。
+    // Play an action from the skill directory. file_path is a file name, not a path on the caller's machine.
+    // timeout_ms covers this RPC round trip only; it does not mean the action has finished playing.
     RpcResult ExecuteAction(const std::string& file_path, int timeout_ms = 3000) const;
 
 private:

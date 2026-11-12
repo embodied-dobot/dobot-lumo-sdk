@@ -59,7 +59,7 @@ Subscriber<typename PubSubType::type> Session::Subscribe(const std::string& topi
     const std::type_index type(typeid(PubSubType));
     if (const auto found = subscriptions_.find(type); found != subscriptions_.end()) {
         if (found->second.topic != topic) {
-            DOBOT_ERROR("同一消息类型只能订阅一个话题，已订阅 {}，不能再订阅 {}", found->second.topic, topic);
+            DOBOT_ERROR("A message type can only subscribe to one topic: already subscribed to {}, cannot also subscribe to {}", found->second.topic, topic);
             return subscriber;
         }
         subscriber.state_ = std::static_pointer_cast<detail::SubState<Msg>>(found->second.state);
@@ -67,7 +67,7 @@ Subscriber<typename PubSubType::type> Session::Subscribe(const std::string& topi
     }
 
     if (!framework_->registerType<PubSubType>()) {
-        DOBOT_ERROR("registerType 失败，话题 {}", topic);
+        DOBOT_ERROR("registerType failed, topic {}", topic);
         return subscriber;
     }
 
@@ -90,17 +90,17 @@ Subscriber<typename PubSubType::type> Session::Subscribe(const std::string& topi
         try {
             callback(msg);
         } catch (...) {
-            // 回调里的异常停在这条 worker，不让后面的样本一起停。
+            // An exception in the callback stops at this worker and does not block later samples.
         }
     });
 
     if (!framework_->registerTopicForType<PubSubType>(topic, dobot::dds::TopicMode::kReaderOnly)) {
-        DOBOT_ERROR("registerTopic 失败，话题 {}", topic);
+        DOBOT_ERROR("registerTopic failed, topic {}", topic);
         return subscriber;
     }
     endpoint->reader = framework_->getGenericDdsManager()->template createReaderForType<PubSubType>(topic);
     if (endpoint->reader == nullptr) {
-        DOBOT_ERROR("创建读者失败，话题 {}", topic);
+        DOBOT_ERROR("Failed to create reader, topic {}", topic);
         return subscriber;
     }
 
@@ -136,7 +136,7 @@ Publisher<typename PubSubType::type> Session::Publish(const std::string& topic) 
     const std::type_index type(typeid(PubSubType));
     if (const auto found = publications_.find(topic); found != publications_.end()) {
         if (found->second.type != type) {
-            DOBOT_ERROR("话题 {} 已经绑定了别的消息类型", topic);
+            DOBOT_ERROR("Topic {} is already bound to a different message type", topic);
             return publisher;
         }
         publisher.state_ = std::static_pointer_cast<typename Publisher<Msg>::State>(found->second.state);
@@ -144,17 +144,17 @@ Publisher<typename PubSubType::type> Session::Publish(const std::string& topic) 
     }
 
     if (!framework_->registerType<PubSubType>()) {
-        DOBOT_ERROR("registerType 失败，话题 {}", topic);
+        DOBOT_ERROR("registerType failed, topic {}", topic);
         return publisher;
     }
     if (!framework_->registerTopicForType<PubSubType>(topic, dobot::dds::TopicMode::kWriterOnly)) {
-        DOBOT_ERROR("registerTopic 失败，话题 {}", topic);
+        DOBOT_ERROR("registerTopic failed, topic {}", topic);
         return publisher;
     }
 
     auto* writer = framework_->getGenericDdsManager()->template createWriterForType<PubSubType>(topic);
     if (writer == nullptr) {
-        DOBOT_ERROR("创建写者失败，话题 {}", topic);
+        DOBOT_ERROR("Failed to create writer, topic {}", topic);
         return publisher;
     }
 

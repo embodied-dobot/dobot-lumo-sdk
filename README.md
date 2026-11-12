@@ -1,109 +1,112 @@
 # dobot-sdk
 
-在自己的电脑上通过网络连接机器人，或拷到机器人本机上运行的 C++ SDK。这个目录里是头文件、预编译库和已经编好的示例。
+**English** | [简体中文](./README.zh-CN.md)
 
-需要 C++17 和 CMake 3.16 或更高版本。预编译库要求系统提供 GLIBC 2.34 和 GLIBCXX 3.4.30 或更高版本，Ubuntu 22.04 满足。`lib/<架构>` 和 `thirdparty/lib/<架构>` 按 aarch64、x86_64 各放一套。CMake 按当前编译器的目标架构自动选择。
+C++ SDK for controlling and monitoring Dobot humanoid robots (SR_3588 and SR_thor) over the network, or from the robot itself, via JSON-RPC and Fast DDS.
 
-## 型号
+This directory contains the public headers, prebuilt libraries, and prebuilt examples. It does not contain the SDK implementation.
 
-两台的 RPC 方法和 DDS 话题相同，头文件各自一份。运控 RPC 端口都是 `51234`，DDS domain 默认是 `0`。
+> **Status:** Early release (version 0.2.0). The API may change between major versions; adding functions or fields is a minor-version change, and deprecated functions are kept for one version before removal.
 
-| 型号 | 命名空间 | 默认 IP |
-|---|---|---|
-| SR_3588 | `dobot::robot::sr_3588` | `192.168.5.2` |
-| SR_thor | `dobot::robot::sr_thor` | `172.16.20.2` |
+## Supported robots
 
-下面用 SR_3588 走通一次查询。SR_thor 把程序名里的 `sr_3588` 换成 `sr_thor`，IP 换成 `172.16.20.2`。
+Both models share the same RPC methods and DDS topics. Each has its own header set.
 
-## 10 分钟查通状态机
+| Model | Namespace | Default IP | RPC port | DDS domain |
+|---|---|---|---|---|
+| SR_3588 | `dobot::robot::sr_3588` | `192.168.5.2` | `51234` | `0` |
+| SR_thor | `dobot::robot::sr_thor` | `172.16.20.2` | `51234` | `0` |
 
-### 1. 确认网络
+## Quick start
 
-调用方要能访问机器人 IP。先看默认地址通不通：
+### Prerequisites
 
-```bash
-ping -c 3 192.168.5.2
+- Linux on x86_64 or aarch64, with GLIBC 2.34 and GLIBCXX 3.4.30 or later (Ubuntu 22.04 qualifies)
+- C++17 compiler and CMake 3.16 or later (only needed to rebuild the examples or use the SDK in your project)
+- Network access to the robot's IP address
+
+The prebuilt libraries are in `lib/<arch>` and `thirdparty/lib/<arch>`. CMake selects the directory that matches the target architecture of your compiler.
+
+### Run a prebuilt example
+
+The steps below use SR_3588. For SR_thor, replace `sr_3588` with `sr_thor` in the program name and use IP `172.16.20.2`.
+
+1. Check that the robot is reachable:
+
+   ```bash
+   ping -c 3 192.168.5.2
+   ```
+
+   If the robot is not at the default address, pass its actual address with `--ip` in the commands below.
+
+2. Query the current state machine (FSM) ID. Use `example/bin/x86_64` on a PC and `example/bin/aarch64` on the robot:
+
+   ```bash
+   # On a PC
+   ./example/bin/x86_64/sr_3588_motion_demo --ip 192.168.5.2
+
+   # On the robot itself
+   ./example/bin/aarch64/sr_3588_motion_demo --on-robot
+   ```
+
+Expected output (the program prints the current state machine ID and a short name; `0` is a valid ID):
+
+```text
+Current FSM 300 (standing)
 ```
 
-不通就改用机器人的实际地址，后面运行示例时加上 `--ip`。
+If the connection fails, the program prints `GetFsmId failed` followed by the error name. Check the IP, port `51234`, and the route from your machine to the robot. The default timeout is 3000 ms; change it with `--timeout-ms`.
 
-`GetFsmId` 走 TCP，端口 `51234`。这一步只要路由能到达该 IP，不用填网卡名。
+Common options:
 
-订 DDS 状态时，domain 默认是 `0`，所有网卡都参与发现。电脑上有多块网卡时，给示例加上 `--nic`，填接机器人的那块。domain 不是 `0` 时加 `--domain`。
+| Option | Meaning |
+|---|---|
+| `--on-robot` | Connect RPC to `127.0.0.1` (when running on the robot) |
+| `--ip <addr>` | Robot address (when running on a PC) |
+| `--nic <name>` | Network interface for DDS discovery; use it when the PC has several interfaces |
+| `--domain <id>` | DDS domain, if it is not `0` |
+| `--timeout-ms <ms>` | RPC timeout |
 
-### 2. 运行已经编好的示例
+### Other examples
 
-在本目录或 `example/bin/<架构>/` 里执行都可以。`example/bin/aarch64` 给机器人，`example/bin/x86_64` 给 x86_64 电脑。程序从包根的 `lib/<架构>` 找 `libdobot_log.so`，从 `thirdparty/lib/<架构>` 找 Fast DDS。
+Binaries are named `sr_3588_<name>` / `sr_thor_<name>`; sources are in `example/src/<model>/`.
 
-机器人上：
+| Example | What it does |
+|---|---|
+| `motion_demo` | Query the FSM ID. `--mode stand` switches to Mini stand, `--action` runs a preset action, `--dance` runs a dance |
+| `walk_demo` | Walk back and forth (requires `--run`) |
+| `rpc_call` | Send a raw JSON-RPC request (requires `--method`); for skills, action files, and methods without a wrapper |
+| `dds_echo` | Subscribe to lower- and upper-body state |
+| `dds_publish_cmd` | Publish one lower-body command frame (requires `--send`) |
+| `dds_event` | Subscribe to the e-stop topic and run a callback |
+| `tts_demo` | Send text to the voice service and wait for the playback result |
+| `action_watch` | Print when a skill starts and ends (`--all` prints every frame) |
+| `state_gap`, `state_gap_pro`, `upper_state_rate`, `upper_arm_swing` | State-rate and latency checks, and an arm-swing demo |
 
-```bash
-./example/bin/aarch64/sr_3588_motion_demo --on-robot
-./example/bin/aarch64/sr_3588_dds_echo --on-robot
-```
-
-电脑上：
-
-```bash
-./example/bin/x86_64/sr_3588_motion_demo --ip 192.168.5.2
-```
-
-`--on-robot` 让 RPC 连本机 `127.0.0.1`。电脑上不带这个参数，并按实际地址加 `--ip`。SR_thor 把程序名里的 `sr_3588` 换成 `sr_thor`。
-
-某一架构的 `example/bin/` 里还没有文件时，说明那一套还没放进来。先用已经放好的架构。
-
-要自己重编示例时，在本目录执行：
-
-```bash
-cmake -S . -B build
-cmake --build build -j
-```
-
-重编的程序在 `build/bin/`。交叉编译时指定目标架构的编译器，例如 `-DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++`，CMake 会改用 `lib/aarch64` 和 `thirdparty/lib/aarch64`。系统的 glibc 或 libstdc++ 低于上面的版本时，配置会提示链不上 `thirdparty/lib/<架构>` 里的 `libfastdds.so`，并跳过 DDS 示例。`sr_3588_motion_demo`、`sr_3588_walk_demo` 和 `sr_3588_rpc_call` 仍然会编出来。
-
-### 3. 查询状态机编号
-
-```bash
-./example/bin/aarch64/sr_3588_motion_demo --on-robot
-```
-
-机器人不在默认地址、程序跑在电脑上时：
-
-```bash
-./example/bin/x86_64/sr_3588_motion_demo --ip 192.168.5.2
-```
-
-成功时打印当前状态机编号和短名称，例如 `当前状态机 300 (站立)`。`0` 也是合法编号。切到 Mini 站立加 `--mode stand`，预设动作加 `--action`，舞蹈加 `--dance`。前后走用 `sr_3588_walk_demo --run`。
-
-连不上时会看到 `GetFsmId 失败`，后面是错误名。先核对 IP、端口 `51234`，以及本机到该地址的路由。默认超时 3000 毫秒，可以加 `--timeout-ms`。
-
-技能重载、动作文件，以及还没有成员函数的方法，用 `sr_3588_rpc_call`。`--method` 必填：
+For example, to call a raw RPC method on the robot:
 
 ```bash
 ./example/bin/aarch64/sr_3588_rpc_call --on-robot --method ReloadArmSkillsData
 ./example/bin/aarch64/sr_3588_rpc_call --on-robot --method ExecuteAction --params '{"file_path":"skill.csv"}'
 ```
 
-## 目录
+> [!WARNING]
+> `walk_demo`, `dds_publish_cmd`, and the action examples move the physical robot. Make sure the area around the robot is clear and an e-stop is within reach.
 
-| 路径 | 内容 |
-|---|---|
-| `include/dobot/sdk/` | DDS 会话、JSON-RPC 传输 |
-| `include/dobot/robot/sr_3588/` | SR_3588 的话题名、RPC 方法和默认 IP |
-| `include/dobot/robot/sr_thor/` | SR_thor 的话题名、RPC 方法和默认 IP |
-| `include/dobot/idl/` | DDS 消息头文件 |
-| `include/nlohmann/` | JSON 头文件 |
-| `lib/aarch64/`、`lib/x86_64/` | `libdobot_sdk.a`、`libdobot_log.so` |
-| `thirdparty/lib/aarch64/`、`thirdparty/lib/x86_64/` | `libfastdds.so`、`libfastcdr.so` |
-| `example/bin/aarch64/`、`example/bin/x86_64/` | 对应架构已经编好的示例 |
-| `example/src/sr_3588/`、`example/src/sr_thor/` | 各型号的示例源码，要改示例时再编 |
-| `thirdparty/include/` | Fast DDS、Fast CDR、日志的头文件 |
+### Rebuild the examples
 
-自己重编的示例落在 `build/bin/`，从 `lib/<架构>` 找 `libdobot_log.so`，从 `thirdparty/lib/<架构>` 找 Fast DDS。DDS 的 domain 和网卡用 `SessionConfig` 的 `domain_id`、`network_interface`，或示例的 `--domain`、`--nic`。
+```bash
+cmake -S . -B build
+cmake --build build -j
+```
 
-## 接到自己的工程
+Binaries are written to `build/bin/`. To cross-compile, pass the target compiler, for example `-DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++`; CMake then uses `lib/aarch64` and `thirdparty/lib/aarch64`.
 
-安装后再 `find_package`：
+If the system glibc or libstdc++ is older than required, configuration reports that `libfastdds.so` cannot be linked and skips the DDS examples. `motion_demo`, `walk_demo`, and `rpc_call` are still built.
+
+## Use the SDK in your project
+
+Install, then use `find_package`:
 
 ```bash
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/opt/dobot_sdk
@@ -116,15 +119,48 @@ find_package(dobot_sdk REQUIRED)
 target_link_libraries(my_app PRIVATE dobot_sdk)
 ```
 
-安装前缀不在 CMake 默认搜索路径里时，配置自己的工程加上 `-DCMAKE_PREFIX_PATH=/opt/dobot_sdk`。
+If the install prefix is not on CMake's search path, configure your project with `-DCMAKE_PREFIX_PATH=/opt/dobot_sdk`.
 
-也可以不安装，直接把本目录加进工程：
+Alternatively, add this directory to your project without installing:
 
 ```cmake
 add_subdirectory(dobot-sdk)
 target_link_libraries(my_app PRIVATE dobot_sdk)
 ```
 
-这样会把示例也编进去。不需要示例时加上 `-DBUILD_EXAMPLES=OFF`。
+This also builds the examples; pass `-DBUILD_EXAMPLES=OFF` to skip them. When Fast DDS can be linked on the current system, `dobot_sdk` also links `fastdds` and `fastcdr`.
 
-当前系统能链上 Fast DDS 时，`dobot_sdk` 会带上 `fastdds` 和 `fastcdr`。链不上时，`motion_demo`、`walk_demo` 和 `rpc_call` 仍然可以编译。
+Applications connect through `dobot::sdk::Session`. DDS domain and network interface are set with `SessionConfig::domain_id` and `SessionConfig::network_interface`.
+
+## Directory layout
+
+| Path | Contents |
+|---|---|
+| `include/dobot/sdk/` | DDS session and JSON-RPC transport |
+| `include/dobot/robot/sr_3588/`, `include/dobot/robot/sr_thor/` | Topic names, RPC methods, and default IP per model |
+| `include/dobot/idl/` | DDS message headers |
+| `include/nlohmann/` | JSON headers |
+| `lib/<arch>/` | `libdobot_sdk.a`, `libdobot_log.so` |
+| `thirdparty/lib/<arch>/`, `thirdparty/include/` | Fast DDS and Fast CDR libraries and headers |
+| `example/bin/<arch>/` | Prebuilt examples |
+| `example/src/<model>/` | Example sources |
+
+## Documentation
+
+- [User guide](./docs/user-guide.md) — Network setup, subscribing and publishing, and the list of topics.
+- [DDS topics](./docs/dds-topics.md) — Fields of each DDS topic.
+
+## Support and contact
+
+- **Bug reports and feature requests:** {{ISSUE_TRACKER_URL}}
+- **Maintainers:** {{MAINTAINER_NAME_OR_EMAIL}}
+
+When reporting a bug, include the SDK version (`GetSdkVersion()`), robot model, your OS and architecture, steps to reproduce, and expected versus actual behavior.
+
+## Security
+
+Do not report security vulnerabilities in public issues. Report them privately to {{SECURITY_CONTACT}}.
+
+## License
+
+{{LICENSE_NAME}}. See [LICENSE](./LICENSE).

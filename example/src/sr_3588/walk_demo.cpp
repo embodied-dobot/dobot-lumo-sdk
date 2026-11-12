@@ -1,5 +1,5 @@
-// SR_3588：切到拟人行走，向前走一段再向后走一段，最后停住。
-// 必须加 --run 才会动。Ctrl+C 会再发一次零速度。
+// SR_3588: Switch to humanoid walking, walk forward for a while, then backward, and finally stop.
+// The robot moves only with --run. Ctrl+C sends zero velocity once more.
 #include "dobot/motion/motion.hpp"
 #include "dobot/robot/sr_3588/topics.hpp"
 #include "dobot/sdk/rpc_client.hpp"
@@ -20,11 +20,11 @@ volatile std::sig_atomic_t g_stop = 0;
 void OnSignal(int) { g_stop = 1; }
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0
+    std::cerr << "Usage: " << argv0
               << " --run [--vx 0.2] [--seconds 2] [--laps 1] [--timeout-ms 3000] [--ip "
-              << dobot::robot::sr_3588::kDefaultRobotIp << "] [--on-robot] [--domain 0] [--nic 网卡名]\n"
-              << "先切到拟人行走，再按 --vx 向前走 --seconds 秒，然后以同样速度向后走，重复 --laps 次，最后停住。\n"
-              << "不加 --run 不会动。速度单位是 m/s。\n";
+              << dobot::robot::sr_3588::kDefaultRobotIp << "] [--on-robot] [--domain 0] [--nic <nic>]\n"
+              << "Switches to humanoid walking, walks forward at --vx for --seconds seconds, then backward at the same speed, repeats --laps times, and finally stops.\n"
+              << "Without --run the robot will not move. Velocity is in m/s.\n";
 }
 
 bool WaitSeconds(float seconds) {
@@ -36,7 +36,7 @@ bool WaitSeconds(float seconds) {
 }
 
 int Fail(const char* what, int32_t code) {
-    std::cerr << what << " 失败 " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
+    std::cerr << what << " failed " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
     return 1;
 }
 
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -86,19 +86,19 @@ int main(int argc, char** argv) {
         } else if (arg == "--nic") {
             network_interface = need("--nic");
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
     }
 
     if (!run) {
-        std::cerr << "未加 --run，机器人不会动。\n";
+        std::cerr << "--run not given; the robot will not move.\n";
         Usage(argv[0]);
         return 2;
     }
     if (vx <= 0.0f || seconds <= 0.0f || laps < 1) {
-        std::cerr << "--vx 和 --seconds 要大于 0，--laps 至少为 1。\n";
+        std::cerr << "--vx and --seconds must be greater than 0, and --laps must be at least 1.\n";
         return 2;
     }
 
@@ -125,24 +125,24 @@ int main(int argc, char** argv) {
     if (code != 0) {
         return Fail("SetRobotMode(walk)", code);
     }
-    std::cout << "已切换到拟人行走。向前 " << vx << " m/s，每段 " << seconds << " 秒，共 " << laps << " 个来回。\n";
+    std::cout << "Switched to humanoid walking. Forward " << vx << " m/s, " << seconds << " s per leg, " << laps << " round trip(s).\n";
 
     bool moving = false;
     for (int lap = 1; lap <= laps && g_stop == 0; ++lap) {
-        std::cout << "第 " << lap << " 个来回：向前\n";
+        std::cout << "Round trip " << lap << ": forward\n";
         code = motion.SetVelocity(vx, 0.0f, 0.0f, seconds, timeout_ms);
         if (code != 0) {
-            return Fail("SetVelocity 向前", code);
+            return Fail("SetVelocity forward", code);
         }
         moving = true;
         if (!WaitSeconds(seconds)) {
             break;
         }
-        std::cout << "第 " << lap << " 个来回：向后\n";
+        std::cout << "Round trip " << lap << ": backward\n";
         code = motion.SetVelocity(-vx, 0.0f, 0.0f, seconds, timeout_ms);
         if (code != 0) {
             motion.SetVelocity(0.0f, 0.0f, 0.0f, 1.0f, timeout_ms);
-            return Fail("SetVelocity 向后", code);
+            return Fail("SetVelocity backward", code);
         }
         if (!WaitSeconds(seconds)) {
             break;
@@ -152,9 +152,9 @@ int main(int argc, char** argv) {
     if (moving || g_stop != 0) {
         code = motion.SetVelocity(0.0f, 0.0f, 0.0f, 1.0f, timeout_ms);
         if (code != 0) {
-            return Fail("SetVelocity 停止", code);
+            return Fail("SetVelocity stop", code);
         }
-        std::cout << "已停止\n";
+        std::cout << "Stopped\n";
     }
     return 0;
 }

@@ -1,5 +1,5 @@
-// SR_thor 的上肢状态帧率示例。一直订 rt/upper/state，直到 Ctrl+C。
-// 回调里只做一次原子加一，周期打印放在主线程。
+// SR_thor upper-body state frame-rate example. Subscribes to rt/upper/state until Ctrl+C.
+// The callback only does one atomic increment; periodic printing runs in the main thread.
 #include "dobot/robot/sr_thor/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -29,10 +29,10 @@ void OnSignal(int) {
 }
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0 << " [--on-robot] [--domain 0] [--nic 网卡名]\n"
-              << "订阅 rt/upper/state，每秒打印这一秒的帧率和从第一帧起的平均帧率。\n"
-              << "一直运行，Ctrl+C 结束。再按一次 Ctrl+C 会立刻结束。\n"
-              << "DDS domain 默认 0。网卡默认全部，多网卡时加 --nic。\n";
+    std::cerr << "Usage: " << argv0 << " [--on-robot] [--domain 0] [--nic <nic>]\n"
+              << "Subscribes to rt/upper/state and prints the rate for each second and the average rate since the first frame.\n"
+              << "Runs until Ctrl+C. Press Ctrl+C again to exit immediately.\n"
+              << "DDS domain defaults to 0. All network interfaces are used by default; with several, add --nic.\n";
 }
 
 }  // namespace
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
         } else if (arg == "--nic") {
             config.network_interface = need("--nic");
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
     std::signal(SIGINT, OnSignal);
     std::signal(SIGTERM, OnSignal);
 
-    // 计数要活得比 Session 久。回调在 Shutdown 把 worker 停掉之后才不会再进来。
+    // The counter must outlive the Session. No callback can arrive once Shutdown has stopped the worker.
     std::atomic<uint64_t> frames{0};
     dobot::sdk::Session session;
     std::string error;
@@ -78,12 +78,12 @@ int main(int argc, char** argv) {
 
     auto upper = session.Subscribe<dobot::msg::dds_::UpperState_PubSubType>(dobot::robot::sr_thor::kTopicUpperState);
     if (!upper.valid()) {
-        std::cerr << "创建订阅失败\n";
+        std::cerr << "Failed to create subscriber\n";
         return 1;
     }
     upper.On([&frames](const dobot::msg::dds_::UpperState_&) { frames.fetch_add(1, std::memory_order_relaxed); });
 
-    std::cout << "订阅 rt/upper/state。Ctrl+C 结束。\n" << std::flush;
+    std::cout << "Subscribed to rt/upper/state. Press Ctrl+C to stop.\n" << std::flush;
 
     uint64_t last_frames = 0;
     bool seen = false;
@@ -109,13 +109,13 @@ int main(int argc, char** argv) {
             const double average_hz = average_sec > 0.0 ? static_cast<double>(total) / average_sec : 0.0;
             std::cout << " window=" << window_hz << " Hz average=" << average_hz << " Hz";
         } else {
-            std::cout << " window=0 Hz average=0 Hz 还没有收到上肢状态";
+            std::cout << " window=0 Hz average=0 Hz no upper-body state received yet";
         }
         std::cout << "\n" << std::flush;
         last_frames = total;
         window_start = now;
     }
 
-    std::cout << "已停止，累计 frames=" << frames.load(std::memory_order_relaxed) << "\n";
+    std::cout << "Stopped. Total frames=" << frames.load(std::memory_order_relaxed) << "\n";
     return 0;
 }

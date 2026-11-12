@@ -4,27 +4,27 @@
 
 namespace dobot::robot::sr_thor {
 
-// 型号 SR_thor。连接参数和话题名只属于这一台。
+// Model SR_thor. Connection parameters and topic names belong to this model only.
 constexpr const char* kModel = "SR_thor";
 constexpr int kAlgsRpcPort = 51234;
 constexpr const char* kDefaultRobotIp = "172.16.20.2";
 
-// 关节状态与命令。
+// Joint state and commands.
 constexpr const char* kTopicLowerState = "rt/lower/state";                 // LowerState_
 constexpr const char* kTopicUpperState = "rt/upper/state";                 // UpperState_
 constexpr const char* kTopicLowerCmd = "rt/lower/cmd";                     // LowerCmd_
 constexpr const char* kTopicUpperCmd = "rt/upper/cmd";                     // UpperCmd_
 constexpr const char* kTopicStandCmd = "rt/stand/cmd";                     // StandingControl_
 
-// IMU。两路都是 IMUState_。一次会话只能订其中一路。
+// IMU. Both channels use IMUState_. A session can subscribe to only one of them.
 constexpr const char* kTopicPelvisImu = "rt/pelvis/imu/data";
 constexpr const char* kTopicTorsoImu = "rt/torso/imu/data";
 
-// 手柄、主节点。
+// Gamepad and main node.
 constexpr const char* kTopicGamepadState = "rt/gamepad/state";             // GamepadState_
 constexpr const char* kTopicMainNodesState = "rt/main/nodes/state";        // MainNodesState_
 
-// 电池与 MCU 遥测。电量百分比在 BmsCommon_.remaining_pct。
+// Battery and MCU telemetry. Battery percentage is in BmsCommon_.remaining_pct.
 constexpr const char* kTopicMcuBmsCommon = "Mcu/BmsCommon";                 // BmsCommon_
 constexpr const char* kTopicMcuBmsUncommon = "Mcu/BmsUncommon";             // BmsUncommon_
 constexpr const char* kTopicMcuHeartbeat = "Mcu/Heartbeat";                 // Heartbeat_
@@ -34,7 +34,7 @@ constexpr const char* kTopicMcuTemp = "Mcu/Temp";                           // T
 constexpr const char* kTopicMcuInit = "Mcu/Init";                           // McuInit_
 constexpr const char* kTopicMcuFault = "Mcu/Fault";                         // Fault_
 
-// 运控命令。
+// Locomotion commands.
 constexpr const char* kTopicEnableMotors = "rt/enable/motors";              // EnableMotors_
 constexpr const char* kTopicClearErrors = "rt/clear/errors";                // ClearErrors_
 constexpr const char* kTopicGoHome = "rt/go/home";                          // GoHome_
@@ -42,13 +42,13 @@ constexpr const char* kTopicSetCalibrationFlag = "rt/set/calibration/flag"; // S
 constexpr const char* kTopicSetFsmId = "rt/set/fsm/id";                     // SetFsmId_
 constexpr const char* kTopicRemoteControl = "rt/remote/control";            // RemoteControl_
 
-// 状态检测。
+// State detection.
 constexpr const char* kTopicDiagnosticReport = "rt/diagnostic/report";      // DiagnosticReport_
 constexpr const char* kTopicLocomotionAlarm = "rt/locomotion/alarm/state";  // LocomotionAlarmState_
 constexpr const char* kTopicWifiStatus = "rt/wifi/status";                  // WifiStatus_
 constexpr const char* kTopicPerfFault = "dobot_perf_fault";                 // FaultInfo_
 
-// 语音。调用方订阅 command、vad、output，发布 tts、ack、control。
+// Voice. Callers subscribe to command, vad and output, and publish tts, ack and control.
 constexpr const char* kTopicVoiceCommand = "rt/voice/command";              // VoiceCommand_
 constexpr const char* kTopicVoiceVadEvent = "rt/voice/vad_event";           // VADEvent_
 constexpr const char* kTopicVoiceTtsRequest = "rt/voice/tts_request";       // TTSRequest_
@@ -56,14 +56,14 @@ constexpr const char* kTopicVoiceAckRequest = "rt/voice/ack_request";       // A
 constexpr const char* kTopicVoiceControl = "rt/voice/control";              // VoiceControl_
 constexpr const char* kTopicVoiceOutputEvent = "rt/voice/output_event";     // VoiceOutputEvent_
 
-// 头部。
+// Head.
 constexpr const char* kTopicHeadEyeEffectCmd = "rt/head/eye_effect_cmd";    // HeadEyeEffectCmd_
 constexpr const char* kTopicHeadInfoRequest = "rt/head/info_request";       // HeadInfoRequest_
 constexpr const char* kTopicHeadState = "rt/head/state";                    // HeadState_
 constexpr const char* kTopicHeadTouchEvent = "rt/head/touch_event";         // HeadTouchEvent_
 constexpr const char* kTopicHeadErrorEvent = "rt/head/error_event";         // HeadErrorEvent_
 
-// Session::Init 使用的连接描述。话题名仍用上面的常量。
+// Connection profile used by Session::Init. Topic names still use the constants above.
 inline dobot::sdk::RobotProfile Profile() {
     return {kModel, kDefaultRobotIp, kAlgsRpcPort};
 }

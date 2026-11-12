@@ -1,3 +1,5 @@
+[English](./user-guide.md) | **简体中文**
+
 # dobot-sdk 使用指南
 
 这份说明给拿到 `dobot-sdk` 目录的二次开发阅读。目录里是头文件、预编译库和已经编好的示例，调用方用 C++17 链接，不编译 SDK 实现。
@@ -14,9 +16,9 @@ SDK 提供两条通道：
 | 型号 | 命名空间 | 话题常量头文件 | 默认 IP | RPC 端口 | DDS domain |
 | --- | --- | --- | --- | --- | --- |
 | SR\_3588 | `dobot::robot::sr_3588` | `include/dobot/robot/sr_3588/topics.hpp` | `192.168.5.2` | `51234` | `0` |
-| SR\_thro | `dobot::robot::sr_thro` | `include/dobot/robot/sr_thro/topics.hpp` | `172.16.20.2` | `51234` | `0` |
+| SR\_thor | `dobot::robot::sr_thor` | `include/dobot/robot/sr_thor/topics.hpp` | `172.16.20.2` | `51234` | `0` |
 
-下文示例用 SR\_3588。换成 SR\_thro 时，把 `dobot::robot::sr_3588` 换成 `dobot::robot::sr_thro`，IP 换成 `172.16.20.2`。话题字符串不用改。
+下文示例用 SR\_3588。换成 SR\_thor 时，把 `dobot::robot::sr_3588` 换成 `dobot::robot::sr_thor`，IP 换成 `172.16.20.2`。话题字符串不用改。
 
 需要 C++17 和 CMake 3.16 或更高版本。预编译库要求 GLIBC 2.34、GLIBCXX 3.4.30 或更高，Ubuntu 22.04 满足。`lib/aarch64`、`lib/x86_64` 和 `thirdparty/lib/` 下的同名目录各放一套库，CMake 按当前编译器的目标架构选择。
 
@@ -60,7 +62,7 @@ ip -br link
 2.  看 RPC 端口。
     
     ```bash
-    timeout 2 bash -c 'cat < /dev/null > /dev/tcp/192.168.5.2/51234' && echo "51234 可达"
+    timeout 2 bash -c 'cat < /dev/null > /dev/tcp/192.168.5.2/51234' && echo "port 51234 reachable"
     
     ```
     
@@ -101,11 +103,11 @@ RPC 连 `127.0.0.1:51234`，DDS 和本机其它进程发现。预编译程序
 
 ```cpp
 dobot::sdk::SessionConfig config;
-config.where = dobot::sdk::RunWhere::kComputer;  // 机器人本机改为 kRobot
-config.robot_ip = "192.168.5.2";                  // 留空则用机型默认 IP
+config.where = dobot::sdk::RunWhere::kComputer;  // use kRobot when running on the robot
+config.robot_ip = "192.168.5.2";                  // if empty, the model's default IP is used
 config.domain_id = 0;
-config.network_interface = "eth0";                // 单网卡可以留空
-config.async_subscribe = false;                   // 默认。true 时回调改到有序 worker
+config.network_interface = "eth0";                // may be left empty with a single interface
+config.async_subscribe = false;                   // default; when true, callbacks move to an ordered worker
 
 ```
 ```cpp
@@ -158,7 +160,7 @@ int main() {
     auto lower = session.Subscribe<dds::LowerState_PubSubType>(dobot::robot::sr_3588::kTopicLowerState);
     auto upper = session.Subscribe<dds::UpperState_PubSubType>(dobot::robot::sr_3588::kTopicUpperState);
     if (!lower.valid() || !upper.valid()) {
-        std::cerr << "创建订阅失败\n";
+        std::cerr << "Failed to create subscriber\n";
         return 1;
     }
 
@@ -166,7 +168,7 @@ int main() {
     const bool got_upper = upper.WaitForData(std::chrono::seconds(5));
     std::cout << "matched lower=" << lower.Matched() << " upper=" << upper.Matched() << "\n";
     if (!got_lower && !got_upper) {
-        std::cerr << "没有收到状态。核对 domain，多网卡时核对 network_interface。\n";
+        std::cerr << "No state received. Check the domain, and the network_interface if there are several.\n";
         return 1;
     }
 
@@ -245,14 +247,14 @@ int main() {
     namespace dds = dobot::msg::dds_;
     auto estop = session.Subscribe<dds::Estop_PubSubType>(dobot::robot::sr_3588::kTopicMcuEstop);
     if (!estop.valid()) {
-        std::cerr << "创建订阅失败\n";
+        std::cerr << "Failed to create subscriber\n";
         return 1;
     }
 
     std::atomic<int> callbacks{0};
     estop.On([&callbacks](const dds::Estop_& msg) {
         const int n = ++callbacks;
-        std::cout << "回调 #" << n
+        std::cout << "Callback #" << n
                   << " stop1=" << static_cast<unsigned>(msg.stop1())
                   << " stop2=" << static_cast<unsigned>(msg.stop2()) << "\n";
     });
@@ -263,7 +265,7 @@ int main() {
     }
     std::cout << "callbacks=" << callbacks.load() << " matched=" << estop.Matched() << "\n";
     if (callbacks.load() == 0) {
-        std::cerr << "没有收到急停话题。核对 domain 和网卡。\n";
+        std::cerr << "No e-stop topic received. Check the domain and the network interface.\n";
         return 1;
     }
     return 0;
@@ -314,12 +316,12 @@ int main() {
     auto upper = session.Subscribe<dds::UpperState_PubSubType>(dobot::robot::sr_3588::kTopicUpperState);
     auto writer = session.Publish<dds::UpperCmd_PubSubType>(dobot::robot::sr_3588::kTopicUpperCmd);
     if (!upper.valid() || !writer.valid()) {
-        std::cerr << "创建订阅或发布失败\n";
+        std::cerr << "Failed to create subscriber or publisher\n";
         return 1;
     }
 
     if (!upper.WaitForData(std::chrono::seconds(3))) {
-        std::cerr << "没有上肢状态，不发送命令\n";
+        std::cerr << "No upper-body state; not sending a command\n";
         return 1;
     }
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(3);
@@ -327,7 +329,7 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     if (writer.Matched() == 0) {
-        std::cerr << "rt/upper/cmd 没有匹配到机器人\n";
+        std::cerr << "rt/upper/cmd did not match the robot\n";
         return 1;
     }
 
@@ -344,10 +346,10 @@ int main() {
         motor.kd(1.0f);
     }
     if (!writer.Write(cmd)) {
-        std::cerr << "Write 失败\n";
+        std::cerr << "Write failed\n";
         return 1;
     }
-    std::cout << "已写回当前上肢角度，matched=" << writer.Matched() << "\n";
+    std::cout << "Wrote back the current upper-body angles, matched=" << writer.Matched() << "\n";
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     return 0;
 }
@@ -435,7 +437,7 @@ QoS 编译在库里，按「话题名.reader」和「话题名.writer」选取�
 | `VoiceCommand_`、`TTSRequest_`、`AckRequest_`、`VoiceOutputEvent_` | `voice.hpp` |
 | `HeadEyeEffectCmd_`、`HeadInfoRequest_`、`HeadState_`、`HeadTouchEvent_`、`HeadErrorEvent_` | `head_control.hpp` |
 
-每个头文件旁边都有同名的 `PubSubTypes.hpp`，两个都要包含。逐字段结构见同目录的 [DDS话题说明.md](DDS%E8%AF%9D%E9%A2%98%E8%AF%B4%E6%98%8E.md)。下面只写调用时必须知道的约定。
+每个头文件旁边都有同名的 `PubSubTypes.hpp`，两个都要包含。逐字段结构见同目录的 [DDS 话题说明](./dds-topics.zh-CN.md)。下面只写调用时必须知道的约定。
 
 ### 4.1 关节状态和命令
 
@@ -566,22 +568,22 @@ int main() {
     const dobot::motion::Motion motion = session.motion();
     int32_t fsm_id = 0;
     if (const int32_t code = motion.GetFsmId(&fsm_id); code != 0) {
-        std::cerr << "GetFsmId 失败 "
+        std::cerr << "GetFsmId failed "
                   << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
         return 1;
     }
-    std::cout << "当前状态机 " << fsm_id << " ("
+    std::cout << "Current FSM " << fsm_id << " ("
               << dobot::motion::Motion::FsmIdToString(fsm_id) << ")\n";
 
     if (const int32_t code = motion.SetRobotMode(dobot::motion::RobotMode::kStanding); code != 0) {
-        std::cerr << "SetRobotMode 失败 "
+        std::cerr << "SetRobotMode failed "
                   << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
         return 1;
     }
 
-    // duration 到时后停止。程序自己退出时再发一次零速度。
+    // Stops when duration expires. Send zero velocity once more when the program exits on its own.
     if (const int32_t code = motion.SetVelocity(0.2f, 0.0f, 0.0f, 1.0f); code != 0) {
-        std::cerr << "SetVelocity 失败 "
+        std::cerr << "SetVelocity failed "
                   << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
         motion.SetVelocity(0.0f, 0.0f, 0.0f);
         return 1;
@@ -603,7 +605,7 @@ int main() {
 ```cpp
 const dobot::sdk::RpcResult action = session.rpc().ExecuteAction("skill.csv");
 if (!action.ok()) {
-    std::cerr << "ExecuteAction 失败 " << dobot::sdk::RpcErrorName(action.error)
+    std::cerr << "ExecuteAction failed " << dobot::sdk::RpcErrorName(action.error)
               << ": " << action.message << "\n";
     return 1;
 }
@@ -613,7 +615,7 @@ if (!action.ok()) {
 还没有封装成函数的方法用 `session.Call`。`params` 传 JSON 对象。这和预编译程序 `sr_3588_rpc_call --method ... --params ...` 是同一条路。`GetFsmId`、`SetFsmId`、`SetVel` 已经有语义接口，不要再按方法名调用。
 
 ```cpp
-const dobot::sdk::RpcResult raw = session.Call("方法名", nlohmann::json::object(), 3000);
+const dobot::sdk::RpcResult raw = session.Call("MethodName", nlohmann::json::object(), 3000);
 
 ```
 
@@ -694,7 +696,7 @@ project(my_app LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 交叉编译 aarch64 时改成 aarch64，并传入对应的编译器。
+# When cross-compiling for aarch64, change this to aarch64 and pass the matching compiler.
 set(TARGET_ARCH x86_64)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(third_party/dobot-sdk)
@@ -776,4 +778,4 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH=$HOME/dobot_sdk
 | 启动即报缺少 `libdobot_log.so` 或 `libfastdds.so` | `LD_LIBRARY_PATH` 或 `RPATH` 是否包含 `lib/<架构>` 和 `thirdparty/lib/<架构>` |
 | 配置时提示链不上 `libfastdds.so` | 系统 GLIBC 低于 2.34，或 GLIBCXX 低于 3.4.30，或编译器架构和 `lib/` 子目录不一致 |
 
-包内可以对照的源码在 `example/src/sr_3588/` 和 `example/src/sr_thro/`。公开包的 CMake 会编译 `motion_demo`、`walk_demo`、`rpc_call`、`dds_echo`、`dds_publish_cmd`、`upper_state_rate`、`upper_arm_swing`。同目录里还有 `dds_event.cpp`、`action_watch.cpp`，公开包的 CMake 没有编进去。`action_watch` 订阅 `rt/set/fsm/id`。查状态机和切模式用 `motion_demo`，速度用 `walk_demo`。`rpc_call` 只用于还没有单独示例的方法。用法以本文第 2、5、6 节的代码为准。
+包内可以对照的源码在 `example/src/sr_3588/` 和 `example/src/sr_thor/`。公开包的 CMake 会编译 `motion_demo`、`walk_demo`、`rpc_call`、`dds_echo`、`dds_publish_cmd`、`upper_state_rate`、`upper_arm_swing`。同目录里还有 `dds_event.cpp`、`action_watch.cpp`，公开包的 CMake 没有编进去。`action_watch` 订阅 `rt/set/fsm/id`。查状态机和切模式用 `motion_demo`，速度用 `walk_demo`。`rpc_call` 只用于还没有单独示例的方法。用法以本文第 2、5、6 节的代码为准。

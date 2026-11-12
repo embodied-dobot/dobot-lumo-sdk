@@ -1,4 +1,4 @@
-// SR_thor 的下肢命令示例。命令在业务线程里 Write，不经过回调队列。
+// SR_thor lower-body command example. The command is written from the application thread, not through the callback queue.
 #include "dobot/robot/sr_thor/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -15,10 +15,10 @@
 namespace {
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0 << " --send [--on-robot] [--domain 0] [--nic 网卡名]\n"
-              << "向 rt/lower/cmd 发一帧全 0 的 LowerCmd，用来确认写端能和机器人匹配。\n"
-              << "DDS domain 默认 0。网卡默认全部，多网卡时加 --nic。\n"
-              << "这是关节命令，只在明确要做通信测试时加 --send。\n";
+    std::cerr << "Usage: " << argv0 << " --send [--on-robot] [--domain 0] [--nic <nic>]\n"
+              << "Sends one all-zero LowerCmd frame to rt/lower/cmd to confirm the writer can match the robot.\n"
+              << "DDS domain defaults to 0. All network interfaces are used by default; with several, add --nic.\n"
+              << "This is a joint command. Add --send only when you really intend a communication test.\n";
 }
 
 }  // namespace
@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
         } else if (arg == "--nic") {
             config.network_interface = need("--nic");
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
 
     auto writer = session.Publish<dobot::msg::dds_::LowerCmd_PubSubType>(dobot::robot::sr_thor::kTopicLowerCmd);
     if (!writer.valid()) {
-        std::cerr << "创建发布失败\n";
+        std::cerr << "Failed to create publisher\n";
         return 1;
     }
 
@@ -79,10 +79,10 @@ int main(int argc, char** argv) {
     std::cout << "rt/lower/cmd matched=" << matched << "\n";
 
     if (!writer.Write(cmd)) {
-        std::cerr << "write 失败\n";
+        std::cerr << "write failed\n";
         return 1;
     }
-    std::cout << "已发送一帧全 0 LowerCmd\n";
+    std::cout << "Sent one all-zero LowerCmd frame\n";
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     return matched > 0 ? 0 : 1;
 }

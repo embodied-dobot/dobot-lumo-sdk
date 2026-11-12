@@ -1,4 +1,4 @@
-// SR_thor 语义化运控示例：查询当前状态机、列出全部状态机、切换 RobotMode。
+// SR_thor semantic motion control example: query the current FSM, list all FSMs, switch RobotMode.
 #include "dobot/motion/motion.hpp"
 #include "dobot/robot/sr_thor/topics.hpp"
 #include "dobot/sdk/rpc_client.hpp"
@@ -13,11 +13,11 @@
 namespace {
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0 << " [--query] [--list] [--mode zero|damp|debug|ready|stand|walk]"
+    std::cerr << "Usage: " << argv0 << " [--query] [--list] [--mode zero|damp|debug|ready|stand|walk]"
               << " [--timeout-ms 3000] [--ip " << dobot::robot::sr_thor::kDefaultRobotIp
-              << "] [--on-robot] [--domain 0] [--nic 网卡名]\n"
-              << "默认打印当前状态机。--list 打印全部状态机编号。指定 --mode 时先切换，再打印当前状态机。\n"
-              << "示例: " << argv0 << " --list\n"
+              << "] [--on-robot] [--domain 0] [--nic <nic>]\n"
+              << "Prints the current FSM by default. --list prints all FSM IDs. With --mode, switches first and then prints the current FSM.\n"
+              << "Example: " << argv0 << " --list\n"
               << "      " << argv0 << " --mode stand\n";
 }
 
@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
         } else if (arg == "--mode") {
             mode_name = need("--mode");
             if (!ParseMode(mode_name, &mode)) {
-                std::cerr << "未知模式: " << mode_name << "\n";
+                std::cerr << "Unknown mode: " << mode_name << "\n";
                 return 2;
             }
             mode_set = true;
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
         } else if (arg == "--nic") {
             network_interface = need("--nic");
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -124,10 +124,10 @@ int main(int argc, char** argv) {
     if (mode_set) {
         const int32_t code = motion.SetRobotMode(mode, timeout_ms);
         if (code != 0) {
-            std::cerr << "SetRobotMode 失败 " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
+            std::cerr << "SetRobotMode failed " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
             return 1;
         }
-        std::cout << "SetRobotMode(" << mode_name << ") 成功\n";
+        std::cout << "SetRobotMode(" << mode_name << ") succeeded\n";
     }
 
     const bool do_query = query_requested || mode_set || (!list && !mode_set);
@@ -135,24 +135,24 @@ int main(int argc, char** argv) {
         int32_t fsm_id = 0;
         const int32_t code = motion.GetFsmId(&fsm_id, timeout_ms);
         if (code != 0) {
-            std::cerr << "GetFsmId 失败 " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
+            std::cerr << "GetFsmId failed " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
             return 1;
         }
-        std::cout << "当前状态机 " << fsm_id << " (" << dobot::motion::Motion::FsmIdToString(fsm_id) << ")\n";
+        std::cout << "Current FSM " << fsm_id << " (" << dobot::motion::Motion::FsmIdToString(fsm_id) << ")\n";
     }
 
     if (list) {
         std::vector<dobot::motion::FsmInfo> fsm_list;
         const int32_t code = motion.GetFsmList(&fsm_list, timeout_ms);
         if (code != 0) {
-            std::cerr << "GetFsmList 失败 " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
+            std::cerr << "GetFsmList failed " << dobot::sdk::RpcErrorName(static_cast<dobot::sdk::RpcError>(code)) << "\n";
             return 1;
         }
-        std::cout << "状态机列表\n";
+        std::cout << "FSM list\n";
         for (const dobot::motion::FsmInfo& item : fsm_list) {
             std::cout << item.fsm_id << " " << item.name;
             if (item.is_dance) {
-                std::cout << " 舞蹈 " << item.dance_name << " " << item.model_file;
+                std::cout << " dance " << item.dance_name << " " << item.model_file;
             }
             std::cout << "\n";
         }

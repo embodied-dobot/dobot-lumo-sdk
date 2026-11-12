@@ -1,8 +1,10 @@
+[English](./dds-topics.md) | **简体中文**
+
 # DDS 话题说明
 
-范围是当前 SDK 已经挂到话题常量上的 DDS 话题。SR\_3588 与 SR\_thro 的话题名相同，常量分别在 `dobot::robot::sr_3588` 和 `dobot::robot::sr_thro`。消息类型在 `dobot::msg::dds_`。
+范围是当前 SDK 已经挂到话题常量上的 DDS 话题。SR\_3588 与 SR\_thor 的话题名相同，常量分别在 `dobot::robot::sr_3588` 和 `dobot::robot::sr_thor`。消息类型在 `dobot::msg::dds_`。
 
-调用方通过 `Session::Subscribe` 订阅、`Session::Publish` 发布。方向按调用方写：订阅表示机器人在发，发布表示调用方在发。默认 domain 为 0。QoS 编译在库里，按「话题名.reader」和「话题名.writer」选取，历史都是 KEEP\_LAST、VOLATILE。下肢和上肢的状态与命令、主节点状态，以及遥控，是 BEST\_EFFORT、深度 2。骨盆 IMU、躯干 IMU 和手柄是 BEST\_EFFORT、深度 4。使能、清错、回零、标零、`rt/set/fsm/id`、急停、电池、MCU 上电、诊断，以及头部表情和信息请求，是 RELIABLE、深度 1。头部状态、触摸和错误是 BEST\_EFFORT、深度 2。库里没有条目的话题使用 Fast DDS 默认 QoS（RELIABLE、KEEP\_LAST、深度 1），对端若是 BEST\_EFFORT 会匹配不上。逐话题 QoS 见 [dobot-SDK使用指南.md](dobot-SDK%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97.md) 第 4 节。
+调用方通过 `Session::Subscribe` 订阅、`Session::Publish` 发布。方向按调用方写：订阅表示机器人在发，发布表示调用方在发。默认 domain 为 0。QoS 编译在库里，按「话题名.reader」和「话题名.writer」选取，历史都是 KEEP\_LAST、VOLATILE。下肢和上肢的状态与命令、主节点状态，以及遥控，是 BEST\_EFFORT、深度 2。骨盆 IMU、躯干 IMU 和手柄是 BEST\_EFFORT、深度 4。使能、清错、回零、标零、`rt/set/fsm/id`、急停、电池、MCU 上电、诊断，以及头部表情和信息请求，是 RELIABLE、深度 1。头部状态、触摸和错误是 BEST\_EFFORT、深度 2。库里没有条目的话题使用 Fast DDS 默认 QoS（RELIABLE、KEEP\_LAST、深度 1），对端若是 BEST\_EFFORT 会匹配不上。逐话题 QoS 见 [使用指南](./user-guide.zh-CN.md) 第 4 节。
 
 仓库没有按话题记录生效版本。下表「生效版本」统一写当前源码已经提供，两台型号共用。
 
@@ -57,7 +59,7 @@
 | --- | --- |
 | Topic | `rt/lower/state` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 2 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅下肢关节反馈。机载 HAL 周期发布位置、速度、力矩和温度。 |
 | 备注 | 状态数组长度 15。二次开发说明里的下标约定是：前 12 路与 `rt/lower/cmd` 对齐，0–5 为左腿，6–11 为右腿。多出的 3 路含义、每一路关节名和正方向尚未写明。`q`、`dq`、力矩和温度的单位 IDL 未标注。 |
@@ -97,7 +99,7 @@ struct MotorState_ {
 | --- | --- |
 | Topic | `rt/upper/state` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 2 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅上肢关节反馈，同时带机型名，以及上肢当前有没有在受控。 |
 | 备注 | `robot_type` 是长度 16 的字符数组，取值表尚未确认。`is_upper_control` 为 true 表示上肢有控制，false 表示上肢无控制。`motor_state` 长度 18。二次开发说明里的下标约定是：0–2 腰，3–9 左臂，10–16 右臂，17 头。每一路关节名、正方向，以及头的路数是否与该约定一致，尚未确认。`MotorState_` 字段同 `rt/lower/state`。 |
@@ -120,7 +122,7 @@ struct UpperState_ {
 | --- | --- |
 | Topic | `rt/lower/cmd` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 2 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 发布下肢关节命令。HAL 订阅后下发给电机，共 12 路。 |
 | 备注 | 下标约定：0–5 左腿，6–11 右腿。每一路关节名和正方向尚未写明。`mode` 的允许取值，以及全 0 帧会不会被当成真实命令，尚未确认。示例 `dds_publish_cmd` 只有加上 `--send` 才会发一帧全 0 命令，用来确认写端匹配。发关节命令前需要确认状态机处于允许底层控制的模式，并且写端已经和机器人匹配。 |
@@ -149,7 +151,7 @@ struct MotorCmd_ {
 | --- | --- |
 | Topic | `rt/upper/cmd` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 2 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 发布上肢关节命令。HAL 订阅后下发给电机。 |
 | 备注 | 数组长度是 18。IDL 注释写成「17 个」，以数组长度 18 为准。下标约定同 `rt/upper/state`：0–2 腰，3–9 左臂，10–16 右臂，17 头。`MotorCmd_` 字段同 `rt/lower/cmd`。 |
@@ -169,7 +171,7 @@ struct UpperCmd_ {
 | --- | --- |
 | Topic | `rt/stand/cmd` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 在 Mini 站立模式（状态机 300）下，同时设置头偏航、腰偏航和身体高度。 |
 | 备注 | 只在状态机 300 下接受。每一帧同时替换这三个目标。腰的俯仰和横滚不在这里控制。发送前先用 RPC `SetFsmId(300)` 进入站立模式。 |
@@ -195,7 +197,7 @@ struct StandingControl_ {
 | --- | --- |
 | Topic | `rt/pelvis/imu/data` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 4 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅骨盆 IMU。 |
 | 备注 | 发布时 `imu_id` 为 1。当前 HAL 主循环周期发布这一路。 |
@@ -221,7 +223,7 @@ struct IMUState_ {
 | --- | --- |
 | Topic | `rt/torso/imu/data` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 4 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅躯干 IMU。字段与骨盆 IMU 相同。 |
 | 备注 | 发布时 `imu_id` 为 2。发布函数已有，当前 HAL 主循环没有调用这一路。 |
@@ -249,7 +251,7 @@ struct IMUState_ {
 | --- | --- |
 | Topic | `rt/gamepad/state` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 4 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅手柄按键和左右摇杆。HAL 读到手柄后发布。 |
 | 备注 | 摇杆数值范围 IDL 未标注。 |
@@ -283,7 +285,7 @@ struct GamepadState_ {
 | --- | --- |
 | Topic | `rt/main/nodes/state` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 2 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅腿、腰、臂、头各伺服节点，以及 EtherCAT 从站的状态、报警、温度、版本和标零结果。 |
 | 备注 | 手和电源状态在 IDL 里被注释掉，当前消息不包含。温度和母线电压的单位 IDL 未标注。 |
@@ -339,7 +341,7 @@ struct EcatSlaveInfo_ {
 | --- | --- |
 | Topic | `Mcu/BmsCommon` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅电池常用遥测：充放电、电压、电流、温度和剩余电量。 |
 | 备注 | 充电电流为负。 |
@@ -378,7 +380,7 @@ struct BmsCommon_ {
 | --- | --- |
 | Topic | `Mcu/BmsUncommon` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅电池逐节电压、电芯温度、累计电量和软硬件版本。 |
 | 备注 | 无。 |
@@ -404,7 +406,7 @@ struct BmsUncommon_ {
 | --- | --- |
 | Topic | `Mcu/Heartbeat` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅 MCU 心跳。序号递增。 |
 | 备注 | 无。 |
@@ -424,7 +426,7 @@ struct Heartbeat_ {
 | --- | --- |
 | Topic | `Mcu/Estop` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅两路急停引脚。 |
 | 备注 | 0 是急停，1 是正常。示例 `dds_event` 订阅这一路，收到一帧就进入回调。 |
@@ -445,7 +447,7 @@ struct Estop_ {
 | --- | --- |
 | Topic | `Mcu/Adc` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅 MCU 两组 ADC，采各路电源电压。 |
 | 备注 | 原始 ADC 码到电压的换算 IDL 未写。 |
@@ -466,7 +468,7 @@ struct Adc_ {
 | --- | --- |
 | Topic | `Mcu/Temp` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅板载本地温度和远程温度。 |
 | 备注 | 数值是摄氏度乘 100，也就是 0.01°C/格。 |
@@ -487,7 +489,7 @@ struct Temp_ {
 | --- | --- |
 | Topic | `Mcu/Init` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅 MCU 上电信息：网络是否起来、IP、运行时间和固件版本。 |
 | 备注 | `version` 最长 32 字符。 |
@@ -513,7 +515,7 @@ struct McuInit_ {
 | --- | --- |
 | Topic | `Mcu/Fault` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅 MCU 当前还没消除的故障码。 |
 | 备注 | 发布时 `node_id` 固定为 2。有效故障码个数看 `dtc_count`，列表容量 32。 |
@@ -542,7 +544,7 @@ struct Fault_ {
 | --- | --- |
 | Topic | `rt/enable/motors` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 按关节开关使能。HAL 订阅。 |
 | 备注 | 30 路关节顺序 IDL 未写明。 |
@@ -562,7 +564,7 @@ struct EnableMotors_ {
 | --- | --- |
 | Topic | `rt/clear/errors` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 请求清除驱动错误。HAL 订阅。 |
 | 备注 | `msg_id` 用来标识这一次请求。 |
@@ -582,7 +584,7 @@ struct ClearErrors_ {
 | --- | --- |
 | Topic | `rt/go/home` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 按关节回零。HAL 订阅。 |
 | 备注 | 30 路关节顺序 IDL 未写明。 |
@@ -602,7 +604,7 @@ struct GoHome_ {
 | --- | --- |
 | Topic | `rt/set/calibration/flag` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 按关节设置标零标志。HAL 订阅。 |
 | 备注 | 30 路关节顺序 IDL 未写明。 |
@@ -622,7 +624,7 @@ struct SetCalibrationFlag_ {
 | --- | --- |
 | Topic | `rt/set/fsm/id` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 运控算法发布当前状态机编号，以及正在播放的技能名。调用方订阅，用来判断技能开始和结束。 |
 | 备注 | `current_action` 为空或 `"\0"` 表示不可播放，`"enable"` 表示可播放但没在播，其它非空字符串是正在播放的技能名。改状态机走 RPC `SetFsmId`，不要发布这个话题。Mini 站立模式编号是 300。示例 `action_watch` 订阅这一路。 |
@@ -643,7 +645,7 @@ struct SetFsmId_ {
 | --- | --- |
 | Topic | `rt/remote/control` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 2 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 发布遥控摇杆。左摇杆管平移，右摇杆管转向。 |
 | 备注 | 摇杆数值范围和轴向正方向 IDL 未标注。速度指令若同时走 RPC `SetVel`，优先级是手柄高于 App，App 高于 RPC。 |
@@ -671,7 +673,7 @@ struct JoystickValue_ {
 | --- | --- |
 | Topic | `rt/diagnostic/report` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅一份汇总诊断，覆盖电机、IMU、手柄、性能、运控告警、头、灯、蓝牙 Wi-Fi、串口和主节点。 |
 | 备注 | HAL 订阅后用来判断能不能继续启动。各分块用 `data_valid` 表示这份数据是否有效。`FaultInfo_` 字段见 `dobot_perf_fault`。`LocomotionAlarmState_` 字段见 `rt/locomotion/alarm/state`。 |
@@ -810,7 +812,7 @@ struct EcatSlaveDiag_ {
 | --- | --- |
 | Topic | `rt/locomotion/alarm/state` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅运控算法当前还没消除的告警。 |
 | 备注 | `active_alarms` 最多 256 条。`truncated` 为 true 表示列表被截断。`message` 最长 256 字符。 |
@@ -861,7 +863,7 @@ struct LocomotionAlarmItem_ {
 | --- | --- |
 | Topic | `rt/wifi/status` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅 Wi-Fi 配网模块的心跳、工作模式、IP 和故障。 |
 | 备注 | `seq` 单调递增，用于去重和排序。 |
@@ -895,7 +897,7 @@ struct WifiStatus_ {
 | --- | --- |
 | Topic | `dobot_perf_fault` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅性能监测模块发出的故障或恢复事件。 |
 | 备注 | 这条话题名没有 `rt/` 前缀。当前类型是性能模块的临时 `FaultInfo_`，字段布局与诊断模块的故障信息一致。`is_recovered` 为 true 表示这是一次恢复事件。 |
@@ -926,7 +928,7 @@ struct FaultInfo_ {
 | --- | --- |
 | Topic | `rt/voice/command` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 订阅语音识别结果。`is_final` 区分中间结果和最终结果。 |
 | 备注 | `session_id` 和 `command_id` 为 UUID。语言无法确定时填 `auto`。 |
@@ -957,7 +959,7 @@ struct VoiceCommand_ {
 | --- | --- |
 | Topic | `rt/voice/tts_request` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 请求把一段文本合成并播报。 |
 | 备注 | 长文本按 `seq_num` 分片，从 0 开始。`is_final` 表示文本结束。回复用户指令时填写对应的 `VoiceCommand_.command_id`，主动播报可以为空。 |
@@ -993,7 +995,7 @@ struct TTSRequest_ {
 | --- | --- |
 | Topic | `rt/voice/ack_request` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 请求播放一段已有的固定音频，不传待合成文本。 |
 | 备注 | `ack_id` 是固定音频资产 ID，不传文件路径，也不传待播报文本。`PriorityLevel` 见 `rt/voice/tts_request`。 |
@@ -1018,7 +1020,7 @@ struct AckRequest_ {
 | --- | --- |
 | Topic | `rt/voice/output_event` |
 | QoS | 库内无单独条目。使用 Fast DDS 默认：RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 播报模块回报请求有没有被接受，以及播放开始、结束、打断或失败。 |
 | 备注 | 程序分支看 `reason`，不要看 `detail`。TTS 文本块事件 `has_seq_num` 为 true；ACK、控制命令和整段播放生命周期事件为 false，此时忽略 `seq_num`。 |
@@ -1109,7 +1111,7 @@ struct VoiceOutputEvent_ {
 | --- | --- |
 | Topic | `rt/head/eye_effect_cmd` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 设置头部眼部表情，以及保持时间和颜色。 |
 | 备注 | `control_node_id` 只作记录，头部不据此选路。`duration_ms` 为 0 表示不指定，由 MCU 用默认保持时间。 |
@@ -1133,7 +1135,7 @@ struct HeadEyeEffectCmd_ {
 | --- | --- |
 | Topic | `rt/head/info_request` |
 | QoS | RELIABLE，KEEP\_LAST，VOLATILE，深度 1 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 发布 \| publish |
 | 接口说明 | 向头部要一次设备信息。 |
 | 备注 | 头部收到请求后才在 `rt/head/state` 回复，不会周期推送。 |
@@ -1154,7 +1156,7 @@ struct HeadInfoRequest_ {
 | --- | --- |
 | Topic | `rt/head/state` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 2 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 头部回复当前表情、固件版本、触摸版本、运行时间和电压。 |
 | 备注 | 收到 `rt/head/info_request` 后才发，不是周期状态。 |
@@ -1181,7 +1183,7 @@ struct HeadState_ {
 | --- | --- |
 | Topic | `rt/head/touch_event` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 2 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 头部上报哪些触摸区域正被按下。 |
 | 备注 | `pressed` 可以同时包含多个区域。枚举值 0–4 与物理键的对应关系在头部桥接里，IDL 只给了区域名。 |
@@ -1211,7 +1213,7 @@ struct HeadTouchEvent_ {
 | --- | --- |
 | Topic | `rt/head/error_event` |
 | QoS | BEST\_EFFORT，KEEP\_LAST，VOLATILE，深度 2 |
-| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thro 共用 |
+| 生效版本 | 当前 SDK；SR\_3588 与 SR\_thor 共用 |
 | 接入方式 | 订阅 \| subscribe |
 | 接口说明 | 头部上报错误码和文字说明。 |
 | 备注 | `error_code` 可能是头部 SDK 错误码，也可能是 MCU 错误码。 |

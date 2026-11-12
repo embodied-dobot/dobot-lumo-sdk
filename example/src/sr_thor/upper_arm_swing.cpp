@@ -1,5 +1,5 @@
-// SR_thor 的上肢摆臂示例。持续写 rt/upper/cmd，直到 Ctrl+C。
-// 先读当前上肢角度，腰、头和其余手臂关节保持该角度，只让双臂第一个关节来回摆。
+// SR_thor upper-body arm swing example. Continuously writes rt/upper/cmd until Ctrl+C.
+// First reads the current upper-body angles; waist, head and the other arm joints hold them, and only the first joint of each arm swings.
 #include "dobot/robot/sr_thor/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -24,8 +24,8 @@ namespace {
 namespace dds_ = dobot::msg::dds_;
 
 constexpr int kUpperJoints = 18;
-constexpr int kLeftArmJoint = 3;    // 左臂第 0 关节。上肢顺序：0–2 腰，3–9 左臂，10–16 右臂，17 头
-constexpr int kRightArmJoint = 10;  // 右臂第 0 关节
+constexpr int kLeftArmJoint = 3;    // Left arm joint 0. Upper-body order: 0-2 waist, 3-9 left arm, 10-16 right arm, 17 head
+constexpr int kRightArmJoint = 10;  // Right arm joint 0
 constexpr uint8_t kMitMode = 11;
 constexpr float kDefaultKp = 10.0f;
 constexpr float kDefaultKd = 1.0f;
@@ -50,14 +50,14 @@ void OnSignal(int) {
 }
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0 << " --move [--on-robot] [--domain 0] [--nic 网卡名] [--amplitude 0.2] [--period 4] [--hz 100] [--kp 10] [--kd 1]\n"
-              << "向 rt/upper/cmd 持续发送上肢命令，让双臂第一个关节绕当前角度来回摆。\n"
-              << "腰、头和其余关节保持启动时读到的角度，不会收到 0。\n"
-              << "amplitude 单位 rad，最大 " << kMaxAmplitude << "；period 单位秒，范围 2 到 30；hz 范围 20 到 200。\n"
-              << "kp 最大 " << kMaxKp << "，kd 最大 " << kMaxKd << "。mode 固定为 " << static_cast<unsigned>(kMitMode) << "。\n"
-              << "一直运行，Ctrl+C 后先回到起始角度再退出。再按一次 Ctrl+C 会立刻结束。\n"
-              << "这是真实关节命令。机器人需要已经处于会执行 rt/upper/cmd 的使能状态。\n"
-              << "DDS domain 默认 0。网卡默认全部，多网卡时加 --nic。\n";
+    std::cerr << "Usage: " << argv0 << " --move [--on-robot] [--domain 0] [--nic <nic>] [--amplitude 0.2] [--period 4] [--hz 100] [--kp 10] [--kd 1]\n"
+              << "Continuously sends upper-body commands to rt/upper/cmd so the first joint of each arm swings around its current angle.\n"
+              << "Waist, head and other joints hold the angles read at startup and never receive 0.\n"
+              << "amplitude in rad, max " << kMaxAmplitude << "; period in seconds, range 2 to 30; hz range 20 to 200.\n"
+              << "kp max " << kMaxKp << ", kd max " << kMaxKd << ". mode is fixed at " << static_cast<unsigned>(kMitMode) << "。\n"
+              << "Runs until Ctrl+C, then returns to the starting angles before exiting. Press Ctrl+C again to exit immediately.\n"
+              << "These are real joint commands. The robot must already be in an enabled state that executes rt/upper/cmd.\n"
+              << "DDS domain defaults to 0. All network interfaces are used by default; with several, add --nic.\n";
 }
 
 struct Options {
@@ -74,7 +74,7 @@ bool ParseDouble(const char* text, const char* name, double* value) {
     try {
         *value = std::stod(text);
     } catch (const std::exception&) {
-        std::cerr << "参数不是数字: " << name << "\n";
+        std::cerr << "Argument is not a number: " << name << "\n";
         return false;
     }
     return true;
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
                 options.kd = static_cast<float>(value);
             }
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -162,19 +162,19 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (!(options.amplitude > 0.0f && options.amplitude <= static_cast<float>(kMaxAmplitude))) {
-        std::cerr << "amplitude 要在 (0, " << kMaxAmplitude << "] rad\n";
+        std::cerr << "amplitude must be in (0, " << kMaxAmplitude << "] rad\n";
         return 2;
     }
     if (!(options.period >= 2.0f && options.period <= 30.0f)) {
-        std::cerr << "period 要在 [2, 30] 秒\n";
+        std::cerr << "period must be in [2, 30] seconds\n";
         return 2;
     }
     if (!(options.hz >= 20.0 && options.hz <= 200.0)) {
-        std::cerr << "hz 要在 [20, 200]\n";
+        std::cerr << "hz must be in [20, 200]\n";
         return 2;
     }
     if (!(options.kp > 0.0f && options.kp <= static_cast<float>(kMaxKp)) || !(options.kd >= 0.0f && options.kd <= static_cast<float>(kMaxKd))) {
-        std::cerr << "kp 要在 (0, " << kMaxKp << "]，kd 要在 [0, " << kMaxKd << "]\n";
+        std::cerr << "kp must be in (0, " << kMaxKp << "], kd must be in [0, " << kMaxKd << "]\n";
         return 2;
     }
 
@@ -191,32 +191,32 @@ int main(int argc, char** argv) {
     auto upper = session.Subscribe<dds_::UpperState_PubSubType>(dobot::robot::sr_thor::kTopicUpperState);
     auto writer = session.Publish<dds_::UpperCmd_PubSubType>(dobot::robot::sr_thor::kTopicUpperCmd);
     if (!upper.valid() || !writer.valid()) {
-        std::cerr << "创建订阅或发布失败\n";
+        std::cerr << "Failed to create subscriber or publisher\n";
         return 1;
     }
     if (!upper.WaitForData(std::chrono::seconds(5))) {
-        std::cerr << "5 秒内没有收到 rt/upper/state，不发送命令\n";
+        std::cerr << "No rt/upper/state received within 5 s; not sending commands\n";
         return 1;
     }
 
-    std::cout << "等待 rt/upper/cmd 匹配。Ctrl+C 结束。\n" << std::flush;
+    std::cout << "Waiting for rt/upper/cmd to match. Press Ctrl+C to stop.\n" << std::flush;
     while (g_stop == 0 && writer.Matched() == 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     if (g_stop != 0) {
-        std::cout << "匹配前已停止\n";
+        std::cout << "Stopped before matching\n";
         return 0;
     }
 
     std::array<float, kUpperJoints> q0{};
     if (!ReadPose(upper, &q0)) {
-        std::cerr << "上肢状态关节数不足 " << kUpperJoints << "，不发送命令\n";
+        std::cerr << "Upper-body state has too few joints: need " << kUpperJoints << "; not sending commands\n";
         return 1;
     }
 
-    std::cout << "开始摆臂。左臂下标 " << kLeftArmJoint << " 与右臂下标 " << kRightArmJoint << " 反向摆动 ±" << options.amplitude
-              << " rad，周期 " << options.period << " s，" << options.hz << " Hz，kp=" << options.kp << " kd=" << options.kd << "。\n"
-              << "其余上肢关节保持当前角度。Ctrl+C 后回到起始角度。\n"
+    std::cout << "Starting arm swing. Left arm index " << kLeftArmJoint << " and right arm index " << kRightArmJoint << " swing in opposite directions by +/-" << options.amplitude
+              << " rad, period " << options.period << " s，" << options.hz << " Hz，kp=" << options.kp << " kd=" << options.kd << "。\n"
+              << "Other upper-body joints hold their current angles. After Ctrl+C, returns to the starting angles.\n"
               << std::flush;
 
     const auto dt = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(1.0 / options.hz));
@@ -260,7 +260,7 @@ int main(int argc, char** argv) {
         std::this_thread::sleep_until(next_tick);
     }
 
-    std::cout << "正在回到起始角度\n" << std::flush;
+    std::cout << "Returning to the starting angles\n" << std::flush;
     next_tick = std::chrono::steady_clock::now();
     constexpr double kReturnSec = 1.0;
     const int return_steps = std::max(1, static_cast<int>(options.hz * kReturnSec));
@@ -273,6 +273,6 @@ int main(int argc, char** argv) {
         std::this_thread::sleep_until(next_tick);
     }
 
-    std::cout << "已停止 write_ok=" << write_ok << " write_fail=" << write_fail << "\n";
+    std::cout << "Stopped. write_ok=" << write_ok << " write_fail=" << write_fail << "\n";
     return 0;
 }

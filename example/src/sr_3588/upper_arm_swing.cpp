@@ -1,6 +1,6 @@
-// SR_3588 的上肢摆臂示例。持续写 rt/upper/cmd，直到 Ctrl+C。
-// 先读当前上肢角度。双臂第二个关节先向外让出 10°，再以这个角度为内侧起点来回摆。
-// Ctrl+C 后回到启动时的贴身角度。
+// SR_3588 upper-body arm swing example. Continuously writes rt/upper/cmd until Ctrl+C.
+// First reads the current upper-body angles. The second joint of each arm first moves outward by 10 deg, then swings back and forth using that angle as the inner starting point.
+// After Ctrl+C, returns to the close-to-body angles from startup.
 #include "dobot/robot/sr_3588/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -25,8 +25,8 @@ namespace {
 namespace dds_ = dobot::msg::dds_;
 
 constexpr int kUpperJoints = 18;
-constexpr int kLeftArmJoint = 4;    // 左臂第 1 关节，向外为正。上肢顺序：0–2 腰，3–9 左臂，10–16 右臂，17 头
-constexpr int kRightArmJoint = 11;  // 右臂第 1 关节，向外为负
+constexpr int kLeftArmJoint = 4;    // Left arm joint 1, outward is positive. Upper-body order: 0-2 waist, 3-9 left arm, 10-16 right arm, 17 head
+constexpr int kRightArmJoint = 11;  // Right arm joint 1, outward is negative
 constexpr float kLeftLateralMin = -0.43f;
 constexpr float kLeftLateralMax = 3.14f;
 constexpr float kRightLateralMin = -3.14f;
@@ -58,14 +58,14 @@ void OnSignal(int) {
 }
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0 << " --move [--on-robot] [--domain 0] [--nic 网卡名] [--amplitude 1.57] [--period 2] [--hz 1000] [--kp 10] [--kd 1]\n"
-              << "向 rt/upper/cmd 持续发送上肢命令。双臂第二个关节先向外让出 10°，再以这个角度为内侧起点向外抬起。\n"
-              << "往复只回到这 10°，不会摆回贴身位置。腰、头和其余关节保持启动时读到的角度，不会收到 0。\n"
-              << "amplitude 是在这 10° 之外再向外的幅度，单位 rad，最大 " << kMaxAmplitude << "；period 是向外再回到这 10° 的秒数，范围 2 到 30；hz 范围 20 到 " << kMaxHz << "。\n"
-              << "kp 最大 " << kMaxKp << "，kd 最大 " << kMaxKd << "。mode 固定为 " << static_cast<unsigned>(kMitMode) << "。\n"
-              << "一直运行，Ctrl+C 后先回到启动时的贴身角度再退出。再按一次 Ctrl+C 会立刻结束。\n"
-              << "这是真实关节命令。机器人需要已经处于会执行 rt/upper/cmd 的使能状态。\n"
-              << "DDS domain 默认 0。网卡默认全部，多网卡时加 --nic。\n";
+    std::cerr << "Usage: " << argv0 << " --move [--on-robot] [--domain 0] [--nic <nic>] [--amplitude 1.57] [--period 2] [--hz 1000] [--kp 10] [--kd 1]\n"
+              << "Continuously sends upper-body commands to rt/upper/cmd. The second joint of each arm first moves outward by 10 deg, then lifts outward from that angle as the inner starting point.\n"
+              << "The swing returns only to that 10 deg, not to the close-to-body position. Waist, head and other joints hold the angles read at startup and never receive 0.\n"
+              << "amplitude is the outward range beyond that 10 deg, in rad, max " << kMaxAmplitude << "; period is the seconds for one outward swing and return to that 10 deg, range 2 to 30; hz range 20 to " << kMaxHz << "。\n"
+              << "kp max " << kMaxKp << ", kd max " << kMaxKd << ". mode is fixed at " << static_cast<unsigned>(kMitMode) << "。\n"
+              << "Runs until Ctrl+C, then returns to the close-to-body angles from startup before exiting. Press Ctrl+C again to exit immediately.\n"
+              << "These are real joint commands. The robot must already be in an enabled state that executes rt/upper/cmd.\n"
+              << "DDS domain defaults to 0. All network interfaces are used by default; with several, add --nic.\n";
 }
 
 struct Options {
@@ -82,7 +82,7 @@ bool ParseDouble(const char* text, const char* name, double* value) {
     try {
         *value = std::stod(text);
     } catch (const std::exception&) {
-        std::cerr << "参数不是数字: " << name << "\n";
+        std::cerr << "Argument is not a number: " << name << "\n";
         return false;
     }
     return true;
@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
                 options.kd = static_cast<float>(value);
             }
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -196,19 +196,19 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (!(options.amplitude > 0.0f && static_cast<double>(options.amplitude) <= kMaxAmplitude + 1.0e-4)) {
-        std::cerr << "amplitude 要在 (0, " << kMaxAmplitude << "] rad\n";
+        std::cerr << "amplitude must be in (0, " << kMaxAmplitude << "] rad\n";
         return 2;
     }
     if (!(options.period >= 2.0f && options.period <= 30.0f)) {
-        std::cerr << "period 要在 [2, 30] 秒\n";
+        std::cerr << "period must be in [2, 30] seconds\n";
         return 2;
     }
     if (!(options.hz >= 20.0 && options.hz <= kMaxHz)) {
-        std::cerr << "hz 要在 [20, " << kMaxHz << "]\n";
+        std::cerr << "hz must be in [20, " << kMaxHz << "]\n";
         return 2;
     }
     if (!(options.kp > 0.0f && options.kp <= static_cast<float>(kMaxKp)) || !(options.kd >= 0.0f && options.kd <= static_cast<float>(kMaxKd))) {
-        std::cerr << "kp 要在 (0, " << kMaxKp << "]，kd 要在 [0, " << kMaxKd << "]\n";
+        std::cerr << "kp must be in (0, " << kMaxKp << "], kd must be in [0, " << kMaxKd << "]\n";
         return 2;
     }
 
@@ -225,33 +225,33 @@ int main(int argc, char** argv) {
     auto upper = session.Subscribe<dds_::UpperState_PubSubType>(dobot::robot::sr_3588::kTopicUpperState);
     auto writer = session.Publish<dds_::UpperCmd_PubSubType>(dobot::robot::sr_3588::kTopicUpperCmd);
     if (!upper.valid() || !writer.valid()) {
-        std::cerr << "创建订阅或发布失败\n";
+        std::cerr << "Failed to create subscriber or publisher\n";
         return 1;
     }
     if (!upper.WaitForData(std::chrono::seconds(5))) {
-        std::cerr << "5 秒内没有收到 rt/upper/state，不发送命令\n";
+        std::cerr << "No rt/upper/state received within 5 s; not sending commands\n";
         return 1;
     }
 
-    std::cout << "等待 rt/upper/cmd 匹配。Ctrl+C 结束。\n" << std::flush;
+    std::cout << "Waiting for rt/upper/cmd to match. Press Ctrl+C to stop.\n" << std::flush;
     while (g_stop == 0 && writer.Matched() == 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     if (g_stop != 0) {
-        std::cout << "匹配前已停止\n";
+        std::cout << "Stopped before matching\n";
         return 0;
     }
 
     std::array<float, kUpperJoints> q0{};
     if (!ReadPose(upper, &q0)) {
-        std::cerr << "上肢状态关节数不足 " << kUpperJoints << "，不发送命令\n";
+        std::cerr << "Upper-body state has too few joints: need " << kUpperJoints << "; not sending commands\n";
         return 1;
     }
 
-    std::cout << "开始摆臂。左臂下标 " << kLeftArmJoint << " 与右臂下标 " << kRightArmJoint << " 先向外让出 " << kClearanceRad
-              << " rad，再向外抬起 " << options.amplitude << " rad，往复回到这 10°，来回 " << options.period << " s，" << options.hz
+    std::cout << "Starting arm swing. Left arm index " << kLeftArmJoint << " and right arm index " << kRightArmJoint << " first move outward by " << kClearanceRad
+              << " rad, then lift outward by " << options.amplitude << " rad, swinging back to that 10 deg, period " << options.period << " s，" << options.hz
               << " Hz，kp=" << options.kp << " kd=" << options.kd << "。\n"
-              << "其余上肢关节保持当前角度。Ctrl+C 后回到贴身角度。\n"
+              << "Other upper-body joints hold their current angles. After Ctrl+C, returns to the close-to-body angles.\n"
               << std::flush;
 
     const auto dt = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(1.0 / options.hz));
@@ -324,7 +324,7 @@ int main(int argc, char** argv) {
         std::this_thread::sleep_until(next_tick);
     }
 
-    std::cout << "正在回到贴身角度\n" << std::flush;
+    std::cout << "Returning to the close-to-body angles\n" << std::flush;
     next_tick = std::chrono::steady_clock::now();
     constexpr double kReturnSec = 1.0;
     const int return_steps = std::max(1, static_cast<int>(options.hz * kReturnSec));
@@ -340,6 +340,6 @@ int main(int argc, char** argv) {
         std::this_thread::sleep_until(next_tick);
     }
 
-    std::cout << "已停止 write_ok=" << write_ok << " write_fail=" << write_fail << "\n";
+    std::cout << "Stopped. write_ok=" << write_ok << " write_fail=" << write_fail << "\n";
     return 0;
 }

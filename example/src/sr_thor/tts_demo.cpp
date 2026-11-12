@@ -1,5 +1,5 @@
-// SR_thor 文字转语音示例。向 rt/voice/tts_request 发一块文本，
-// 并订阅 rt/voice/output_event，直到播放结束或被拒绝。
+// SR_thor text-to-speech example. Sends a block of text to rt/voice/tts_request
+// and subscribes to rt/voice/output_event until playback ends or is rejected.
 #include "dobot/robot/sr_thor/topics.hpp"
 #include "dobot/sdk/session.hpp"
 
@@ -18,12 +18,12 @@ namespace dds_ = dobot::msg::dds_;
 namespace {
 
 void Usage(const char* argv0) {
-    std::cerr << "用法: " << argv0
-              << " [--text 要播报的文字] [--source agent] [--seconds 15]"
-              << " [--on-robot] [--domain 0] [--nic 网卡名]\n"
-              << "向 rt/voice/tts_request 发一块文本，并订阅 rt/voice/output_event。\n"
-              << "source 必须是 Voice 来源策略里允许 TTS 的名字，文档示例是 agent。\n"
-              << "DDS domain 默认 0。网卡默认全部，多网卡时加 --nic。\n";
+    std::cerr << "Usage: " << argv0
+              << " [--text <text>] [--source agent] [--seconds 15]"
+              << " [--on-robot] [--domain 0] [--nic <nic>]\n"
+              << "Sends a block of text to rt/voice/tts_request and subscribes to rt/voice/output_event.\n"
+              << "source must be a name that the Voice source policy allows for TTS; the documented example is agent.\n"
+              << "DDS domain defaults to 0. All network interfaces are used by default; with several, add --nic.\n";
 }
 
 const char* EventName(dds_::OutputEventType event) {
@@ -66,14 +66,14 @@ int64_t UnixMs() {
 
 int main(int argc, char** argv) {
     dobot::sdk::SessionConfig config;
-    std::string text = "当前状态正常。";
+    std::string text = "Status is normal.";
     std::string source = "agent";
     int seconds = 15;
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
         auto need = [&](const char* name) -> const char* {
             if (i + 1 >= argc) {
-                std::cerr << "缺少参数: " << name << "\n";
+                std::cerr << "Missing argument: " << name << "\n";
                 std::exit(2);
             }
             return argv[++i];
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
         } else if (arg == "--seconds") {
             seconds = std::stoi(need("--seconds"));
         } else {
-            std::cerr << "未知参数: " << arg << "\n";
+            std::cerr << "Unknown argument: " << arg << "\n";
             Usage(argv[0]);
             return 2;
         }
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
         dobot::robot::sr_thor::kTopicVoiceOutputEvent);
     auto writer = session.Publish<dds_::TTSRequest_PubSubType>(dobot::robot::sr_thor::kTopicVoiceTtsRequest);
     if (!events.valid() || !writer.valid()) {
-        std::cerr << "创建订阅或发布失败\n";
+        std::cerr << "Failed to create subscriber or publisher\n";
         return 1;
     }
 
@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     if (writer.Matched() == 0) {
-        std::cerr << "rt/voice/tts_request 没有匹配到 Voice。核对 domain 和网卡。\n";
+        std::cerr << "rt/voice/tts_request did not match Voice. Check the domain and network interface.\n";
         return 1;
     }
 
@@ -155,20 +155,20 @@ int main(int argc, char** argv) {
     request.reply_to_command_id("");
 
     if (!writer.Write(request)) {
-        std::cerr << "Write 失败\n";
+        std::cerr << "Write failed\n";
         return 1;
     }
-    std::cout << "已发送 TTS，speak_id=" << speak_id << " text=" << text << "\n";
+    std::cout << "TTS sent, speak_id=" << speak_id << " text=" << text << "\n";
 
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
     while (std::chrono::steady_clock::now() < deadline && terminal.load() < 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     if (terminal.load() < 0) {
-        std::cerr << "超时，没有收到播放结束事件\n";
+        std::cerr << "Timed out; no playback-end event received\n";
         return 1;
     }
     const auto event = static_cast<dds_::OutputEventType>(terminal.load());
-    std::cout << "结束: " << EventName(event) << "\n";
+    std::cout << "Finished: " << EventName(event) << "\n";
     return event == dds_::OutputEventType::PLAYBACK_COMPLETED ? 0 : 1;
 }
