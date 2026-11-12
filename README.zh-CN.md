@@ -163,4 +163,4 @@ target_link_libraries(my_app PRIVATE dobot_sdk)
 
 ## 许可证
 
-{{LICENSE_NAME}}，详见 [LICENSE](./LICENSE)。
+MIT 许可证，详见 [LICENSE](./LICENSE)。随包分发的第三方组件的声明见 [licenses/](./licenses/)。

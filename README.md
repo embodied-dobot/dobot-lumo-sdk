@@ -163,4 +163,4 @@ Do not report security vulnerabilities in public issues. Report them privately t
 
 ## License
 
-{{LICENSE_NAME}}. See [LICENSE](./LICENSE).
+MIT License. See [LICENSE](./LICENSE). Notices for bundled third-party components are in [licenses/](./licenses/).
