@@ -152,14 +152,13 @@ Applications connect through `dobot::sdk::Session`. DDS domain and network inter
 
 ## Support and contact
 
-- **Bug reports and feature requests:** {{ISSUE_TRACKER_URL}}
-- **Maintainers:** {{MAINTAINER_NAME_OR_EMAIL}}
+- **Bug reports and feature requests:** open an issue in this repository's [Issues](../../issues) tab.
 
 When reporting a bug, include the SDK version (`GetSdkVersion()`), robot model, your OS and architecture, steps to reproduce, and expected versus actual behavior.
 
 ## Security
 
-Do not report security vulnerabilities in public issues. Report them privately to {{SECURITY_CONTACT}}.
+Do not report security vulnerabilities in public issues. Use GitHub's private vulnerability reporting: open the **Security** tab of this repository and choose **Report a vulnerability**.
 
 ## License
 
