@@ -10,8 +10,8 @@ if(DOBOT_FASTDDS_LINK_OK)
   dobot_add_example(sr_thor_upper_arm_swing upper_arm_swing.cpp)
 else()
   message(WARNING
-    "当前系统链不上 thirdparty/lib/${TARGET_ARCH} 里的 libfastdds.so（需要 GLIBC 2.34 和 GLIBCXX 3.4.30 或更高）。"
-    "已跳过 DDS 示例，sr_thor_rpc_call、sr_thor_motion_demo 和 sr_thor_walk_demo 仍可编译。")
+    "The current system cannot link libfastdds.so in thirdparty/lib/${TARGET_ARCH} (GLIBC 2.34 and GLIBCXX 3.4.30 or later are required)."
+    "The DDS examples are skipped; sr_thor_rpc_call, sr_thor_motion_demo and sr_thor_walk_demo are still built.")
 endif()
 
 set(DOBOT_MODEL sr_thor)

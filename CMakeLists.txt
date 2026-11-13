@@ -32,7 +32,7 @@ message(STATUS "dobot-sdk architecture: ${TARGET_ARCH}")
 
 set(DOBOT_SDK_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/${TARGET_ARCH}/libdobot_sdk.a")
 if(NOT EXISTS "${DOBOT_SDK_LIB}")
-  message(FATAL_ERROR "未找到 ${DOBOT_SDK_LIB}。请确认 SDK 包完整，且当前编译器的目标架构与 lib/aarch64 或 lib/x86_64 一致。")
+  message(FATAL_ERROR "${DOBOT_SDK_LIB} not found. Make sure the SDK package is complete and that the target architecture of the current compiler matches lib/aarch64 or lib/x86_64.")
 endif()
 
 add_subdirectory(thirdparty)
@@ -69,7 +69,7 @@ endif()
 
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY thirdparty/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-# 安装前缀把两类库收进同一个 lib/。导出的 dobot_sdkTargets.cmake 按这个位置查找。
+# The install prefix puts both kinds of libraries into one lib/. The exported dobot_sdkTargets.cmake looks them up there.
 install(DIRECTORY "${DOBOT_LIB_DIR}/" DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY "${FASTDDS_LIB_DIR}/" DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES cmake/dobot_sdkTargets.cmake DESTINATION lib/cmake/dobot_sdk)

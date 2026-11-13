@@ -5,7 +5,7 @@
 // change. Deprecate a function for one version before removing it.
 #define DOBOT_SDK_VERSION_MAJOR 0
 #define DOBOT_SDK_VERSION_MINOR 2
-#define DOBOT_SDK_VERSION_PATCH 0
+#define DOBOT_SDK_VERSION_PATCH 1
 
 namespace dobot::sdk {
 inline namespace v1 {

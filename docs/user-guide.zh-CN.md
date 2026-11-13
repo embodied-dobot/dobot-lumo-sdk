@@ -1,8 +1,8 @@
 [English](./user-guide.md) | **简体中文**
 
-# dobot-sdk 使用指南
+# dobot-lumo-sdk-cpp 使用指南
 
-这份说明给拿到 `dobot-sdk` 目录的二次开发阅读。目录里是头文件、预编译库和已经编好的示例，调用方用 C++17 链接，不编译 SDK 实现。
+这份说明给拿到 `dobot-lumo-sdk-cpp` 目录的二次开发阅读。目录里是头文件、预编译库和已经编好的示例，调用方用 C++17 链接，不编译 SDK 实现。
 
 SDK 提供两条通道：
 
@@ -22,7 +22,7 @@ SDK 提供两条通道：
 
 需要 C++17 和 CMake 3.16 或更高版本。预编译库要求 GLIBC 2.34、GLIBCXX 3.4.30 或更高，Ubuntu 22.04 满足。`lib/aarch64`、`lib/x86_64` 和 `thirdparty/lib/` 下的同名目录各放一套库，CMake 按当前编译器的目标架构选择。
 
-下文路径都相对于拿到的 `dobot-sdk` 目录。
+下文路径都相对于拿到的 `dobot-lumo-sdk-cpp` 目录。
 
 ## 0. 互通网络
 
@@ -48,7 +48,7 @@ ip -br link
 
 填 `eth0`、`enp3s0` 这种接口名。
 
-按这个顺序确认，在 `dobot-sdk` 目录下执行。x86\_64 电脑用 `example/bin/x86_64/`，机器人本机用 `example/bin/aarch64/`。
+按这个顺序确认，在 `dobot-lumo-sdk-cpp` 目录下执行。x86\_64 电脑用 `example/bin/x86_64/`，机器人本机用 `example/bin/aarch64/`。
 
 1.  看默认地址通不通。
     
@@ -677,7 +677,7 @@ const dobot::sdk::RpcResult raw = session.Call("MethodName", nlohmann::json::obj
 
 ## 7. 接到自己的工程
 
-把整个 `dobot-sdk` 目录放进工程。头文件、`lib/<架构>/libdobot_sdk.a`、`lib/<架构>/libdobot_log.so`、`thirdparty/lib/<架构>/` 里的 `libfastdds.so` 和 `libfastcdr.so` 要在一起。只拷头文件或只拷静态库，链接或运行时会缺库。
+把整个 `dobot-lumo-sdk-cpp` 目录放进工程。头文件、`lib/<架构>/libdobot_sdk.a`、`lib/<架构>/libdobot_log.so`、`thirdparty/lib/<架构>/` 里的 `libfastdds.so` 和 `libfastcdr.so` 要在一起。只拷头文件或只拷静态库，链接或运行时会缺库。
 
 两种接法：
 
@@ -688,7 +688,7 @@ const dobot::sdk::RpcResult raw = session.Call("MethodName", nlohmann::json::obj
 
 ### 7.1 把目录加进工程
 
-假设自己的工程和 `dobot-sdk` 同级，或者已经把该目录拷到工程里的 `third_party/dobot-sdk`。
+假设自己的工程和 `dobot-lumo-sdk-cpp` 同级，或者已经把该目录拷到工程里的 `third_party/dobot-lumo-sdk-cpp`。
 
 ```cmake
 cmake_minimum_required(VERSION 3.16)
@@ -699,13 +699,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # When cross-compiling for aarch64, change this to aarch64 and pass the matching compiler.
 set(TARGET_ARCH x86_64)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(third_party/dobot-sdk)
+add_subdirectory(third_party/dobot-lumo-sdk-cpp)
 
 add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE dobot_sdk)
 if(UNIX AND NOT APPLE)
   set_target_properties(my_app PROPERTIES
-    BUILD_RPATH "\$ORIGIN/../third_party/dobot-sdk/lib/${TARGET_ARCH};\$ORIGIN/../third_party/dobot-sdk/thirdparty/lib/${TARGET_ARCH}")
+    BUILD_RPATH "\$ORIGIN/../third_party/dobot-lumo-sdk-cpp/lib/${TARGET_ARCH};\$ORIGIN/../third_party/dobot-lumo-sdk-cpp/thirdparty/lib/${TARGET_ARCH}")
   target_link_options(my_app PRIVATE "LINKER:--disable-new-dtags")
 endif()
 
@@ -716,7 +716,7 @@ endif()
 `RPATH` 按可执行文件的实际相对位置改。也可以在运行前指定动态库目录：
 
 ```bash
-export LD_LIBRARY_PATH=/path/to/dobot-sdk/lib/x86_64:/path/to/dobot-sdk/thirdparty/lib/x86_64
+export LD_LIBRARY_PATH=/path/to/dobot-lumo-sdk-cpp/lib/x86_64:/path/to/dobot-lumo-sdk-cpp/thirdparty/lib/x86_64
 
 ```
 
@@ -734,7 +734,7 @@ cmake --build build -j
 
 ### 7.2 安装后再 find\_package
 
-在 `dobot-sdk` 目录执行。这只安装当前编译器对应的那一套，并把它展平到前缀的 `lib/`，不再保留 `aarch64`、`x86_64` 子目录。
+在 `dobot-lumo-sdk-cpp` 目录执行。这只安装当前编译器对应的那一套，并把它展平到前缀的 `lib/`，不再保留 `aarch64`、`x86_64` 子目录。
 
 ```bash
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$HOME/dobot_sdk

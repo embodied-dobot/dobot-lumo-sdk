@@ -1,4 +1,4 @@
-# dobot-sdk
+# dobot-lumo-sdk-cpp
 
 [English](./README.md) | **简体中文**
 
@@ -6,7 +6,7 @@
 
 本目录包含公开头文件、预编译库和已编好的示例，不含 SDK 的实现源码。
 
-> **项目状态：** 早期版本（0.2.0）。主版本之间 API 可能变化；增加函数或字段属于次版本，被废弃的函数会保留一个版本后再删除。
+> **项目状态：** 早期版本（0.2.1）。主版本之间 API 可能变化；增加函数或字段属于次版本，被废弃的函数会保留一个版本后再删除。
 
 ## 支持的机器人
 
@@ -124,7 +124,7 @@ target_link_libraries(my_app PRIVATE dobot_sdk)
 也可以不安装，直接把本目录加进工程：
 
 ```cmake
-add_subdirectory(dobot-sdk)
+add_subdirectory(dobot-lumo-sdk-cpp)
 target_link_libraries(my_app PRIVATE dobot_sdk)
 ```
 

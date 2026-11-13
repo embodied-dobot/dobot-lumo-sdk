@@ -1,4 +1,4 @@
-# dobot-sdk
+# dobot-lumo-sdk-cpp
 
 **English** | [简体中文](./README.zh-CN.md)
 
@@ -6,7 +6,7 @@ C++ SDK for controlling and monitoring Dobot humanoid robots (SR_3588 and SR_tho
 
 This directory contains the public headers, prebuilt libraries, and prebuilt examples. It does not contain the SDK implementation.
 
-> **Status:** Early release (version 0.2.0). The API may change between major versions; adding functions or fields is a minor-version change, and deprecated functions are kept for one version before removal.
+> **Status:** Early release (version 0.2.1). The API may change between major versions; adding functions or fields is a minor-version change, and deprecated functions are kept for one version before removal.
 
 ## Supported robots
 
@@ -124,7 +124,7 @@ If the install prefix is not on CMake's search path, configure your project with
 Alternatively, add this directory to your project without installing:
 
 ```cmake
-add_subdirectory(dobot-sdk)
+add_subdirectory(dobot-lumo-sdk-cpp)
 target_link_libraries(my_app PRIVATE dobot_sdk)
 ```
 

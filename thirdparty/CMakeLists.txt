@@ -21,7 +21,7 @@ target_link_directories(fastdds INTERFACE "${DOBOT_FAST_LIB_DIR}")
 
 set(DOBOT_LOG_LIB "${DOBOT_SDK_LIB_DIR}/libdobot_log.so")
 if(NOT EXISTS "${DOBOT_LOG_LIB}")
-  message(FATAL_ERROR "未找到 ${DOBOT_LOG_LIB}。请先在 dobot-sdk-src 编译并执行 stage_public_sdk。")
+  message(FATAL_ERROR "${DOBOT_LOG_LIB} not found. Make sure the SDK package is complete: libdobot_log.so must be in lib/<arch>.")
 endif()
 add_library(dobot_log SHARED IMPORTED GLOBAL)
 set_target_properties(dobot_log PROPERTIES

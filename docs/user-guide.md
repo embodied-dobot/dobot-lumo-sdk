@@ -1,8 +1,8 @@
 **English** | [简体中文](./user-guide.zh-CN.md)
 
-# dobot-sdk User Guide
+# dobot-lumo-sdk-cpp User Guide
 
-This guide is for developers building on top of the `dobot-sdk` directory. The directory contains headers, prebuilt libraries, and prebuilt examples. You link against it with C++17; the SDK implementation is not compiled by you.
+This guide is for developers building on top of the `dobot-lumo-sdk-cpp` directory. The directory contains headers, prebuilt libraries, and prebuilt examples. You link against it with C++17; the SDK implementation is not compiled by you.
 
 The SDK provides two channels:
 
@@ -22,7 +22,7 @@ The examples below use SR\_3588. For SR\_thor, replace `dobot::robot::sr_3588` w
 
 You need C++17 and CMake 3.16 or later. The prebuilt libraries require GLIBC 2.34 and GLIBCXX 3.4.30 or later; Ubuntu 22.04 qualifies. `lib/aarch64`, `lib/x86_64`, and the directories of the same names under `thirdparty/lib/` each hold one set of libraries; CMake selects one according to the target architecture of the current compiler.
 
-All paths below are relative to the `dobot-sdk` directory.
+All paths below are relative to the `dobot-lumo-sdk-cpp` directory.
 
 ## 0. Network connectivity
 
@@ -48,7 +48,7 @@ ip -br link
 
 Use an interface name such as `eth0` or `enp3s0`.
 
-Verify in this order, running from the `dobot-sdk` directory. On an x86\_64 PC use `example/bin/x86_64/`; on the robot itself use `example/bin/aarch64/`.
+Verify in this order, running from the `dobot-lumo-sdk-cpp` directory. On an x86\_64 PC use `example/bin/x86_64/`; on the robot itself use `example/bin/aarch64/`.
 
 1.  Check that the default address is reachable.
     
@@ -677,7 +677,7 @@ This SDK does not wrap whole-robot device status, audio, navigation, or GPIO. Me
 
 ## 7. Integrating into your own project
 
-Put the whole `dobot-sdk` directory into your project. The headers, `lib/<arch>/libdobot_sdk.a`, `lib/<arch>/libdobot_log.so`, and `libfastdds.so` and `libfastcdr.so` under `thirdparty/lib/<arch>/` must stay together. Copying only the headers or only the static library leaves libraries missing at link time or run time.
+Put the whole `dobot-lumo-sdk-cpp` directory into your project. The headers, `lib/<arch>/libdobot_sdk.a`, `lib/<arch>/libdobot_log.so`, and `libfastdds.so` and `libfastcdr.so` under `thirdparty/lib/<arch>/` must stay together. Copying only the headers or only the static library leaves libraries missing at link time or run time.
 
 There are two ways to integrate:
 
@@ -688,7 +688,7 @@ There are two ways to integrate:
 
 ### 7.1 Adding the directory to your project
 
-Assume your project is next to `dobot-sdk`, or that you have copied the directory to `third_party/dobot-sdk` in your project.
+Assume your project is next to `dobot-lumo-sdk-cpp`, or that you have copied the directory to `third_party/dobot-lumo-sdk-cpp` in your project.
 
 ```cmake
 cmake_minimum_required(VERSION 3.16)
@@ -699,13 +699,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # When cross-compiling for aarch64, change this to aarch64 and pass the matching compiler.
 set(TARGET_ARCH x86_64)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(third_party/dobot-sdk)
+add_subdirectory(third_party/dobot-lumo-sdk-cpp)
 
 add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE dobot_sdk)
 if(UNIX AND NOT APPLE)
   set_target_properties(my_app PROPERTIES
-    BUILD_RPATH "\$ORIGIN/../third_party/dobot-sdk/lib/${TARGET_ARCH};\$ORIGIN/../third_party/dobot-sdk/thirdparty/lib/${TARGET_ARCH}")
+    BUILD_RPATH "\$ORIGIN/../third_party/dobot-lumo-sdk-cpp/lib/${TARGET_ARCH};\$ORIGIN/../third_party/dobot-lumo-sdk-cpp/thirdparty/lib/${TARGET_ARCH}")
   target_link_options(my_app PRIVATE "LINKER:--disable-new-dtags")
 endif()
 
@@ -716,7 +716,7 @@ Set `BUILD_EXAMPLES` to OFF to avoid building the SDK's own examples. If you do 
 Adjust `RPATH` to the actual relative location of your executable. You can also specify the shared-library directories before running:
 
 ```bash
-export LD_LIBRARY_PATH=/path/to/dobot-sdk/lib/x86_64:/path/to/dobot-sdk/thirdparty/lib/x86_64
+export LD_LIBRARY_PATH=/path/to/dobot-lumo-sdk-cpp/lib/x86_64:/path/to/dobot-lumo-sdk-cpp/thirdparty/lib/x86_64
 
 ```
 
@@ -734,7 +734,7 @@ If the system's glibc or libstdc++ is older than the versions given earlier, con
 
 ### 7.2 Installing, then find\_package
 
-Run this in the `dobot-sdk` directory. It installs only the set matching the current compiler, and flattens it into the prefix's `lib/`, no longer keeping the `aarch64` and `x86_64` subdirectories.
+Run this in the `dobot-lumo-sdk-cpp` directory. It installs only the set matching the current compiler, and flattens it into the prefix's `lib/`, no longer keeping the `aarch64` and `x86_64` subdirectories.
 
 ```bash
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$HOME/dobot_sdk

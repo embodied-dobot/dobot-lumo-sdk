@@ -1,5 +1,5 @@
 if(CMAKE_VERSION VERSION_LESS 3.16)
-  message(FATAL_ERROR "dobot_sdk 需要 CMake 3.16 或更高版本。")
+  message(FATAL_ERROR "dobot_sdk requires CMake 3.16 or later.")
 endif()
 
 get_filename_component(_IMPORT_PREFIX "${CMAKE_CURRENT_LIST_FILE}" PATH)
